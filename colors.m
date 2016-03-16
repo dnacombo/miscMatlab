@@ -690,8 +690,9 @@ elseif strcmp(name,'gallery')
     allcols = padarray(allcols,[n,0],NaN,'post');
     allcols = reshape(allcols,r,c,[]);
     figure(158866);clf
-    set(gcf,'numbertitle','off','name','colors')
+    set(gcf,'numbertitle','off','name','colors','menuBar','none')
     h = imagesc(allcols);
+    axis off
     set(h,'UserData',cols);
     h = datacursormode(gcf);
     set(h,'enable','on','updatefcn',@datatxt);
