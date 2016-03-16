@@ -698,7 +698,12 @@ elseif strcmp(name,'gallery')
     return
 end
 
-rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+if iscellstr(name)
+    name = name(:);
+    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
+else
+    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+end
 
 function [row, col,n] = num2rowcol(num,R)
 % 
