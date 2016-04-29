@@ -5,18 +5,26 @@ function [rgb] = colors(name)
 % return the RGB triplet for a named color
 % names are taken from the 657 default colors from R (colors())
 %
-% colors(list) returns the list of all names
+% [list] = colors('list') 
+% returns the list of all names
 % 
-% colors or colors('gallery')
-%
+% colors 
 % opens an interactive window to select a color.
+%
+% [rgb] = colors
+% returns all available rgb triplets
 %
 %
 
 % v0. Max 2016
 
 if nargin == 0
-    name = 'gallery';
+    if nargout == 0
+        name = 'gallery';
+    else
+        rgb = colors(colors('list'));
+        return
+    end
 end
 
 cols = {
