@@ -4,15 +4,24 @@ function ok = writethisbatch(matlabbatch,filename)
 % 
 % write an m file to regenerate matlabbatch.
 
-error(nargchk(2,2,nargin));
+narginchk(1,2);
+if nargin == 1
+    if not(ischar(matlabbatch))
+        error('provide file name')
+    end
+    filename = [myfileparts(matlabbatch,'pf') '.m'];
+end
 
+if ischar(matlabbatch)
+    matlabbatch = load(matlabbatch);
+end
 if isfield(matlabbatch,'matlabbatch')
     matlabbatch = matlabbatch.matlabbatch;
 end
 
 towrite = gencode(matlabbatch);
 fid = fopen(filename,'wt');
-if ~fid
+if fid == -1
     error(['Could not open file ' filename]);
 end
 
