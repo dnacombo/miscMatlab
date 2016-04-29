@@ -121,6 +121,9 @@ if nargout <= 1 && not(isempty(whatpiece))
     
     if not(isempty(strfind(whatpiece,'p')))
         path = [path p];
+        if not(isempty(p))
+            path = [path filesep];
+        end
     end
     if not(isempty(strfind(whatpiece,'f')))
         path = [path name];
