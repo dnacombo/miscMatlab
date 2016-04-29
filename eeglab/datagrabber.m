@@ -107,13 +107,13 @@ if g.rerange || strncmp(g.loadmode,'eeglab',6)
     clear re
     if ischar(GRAB)
         error('Data should already have been loaded. Enter it as first argument...')
-%     elseif ischar(GRAB(1).EEG.data)
-%         error('Data should already have been loaded. Not just in info mode...')
+    elseif ischar(GRAB(1).EEG.data)
+        error('Data should already have been loaded. Not just in info mode...')
     end
-%     g.range = makerange(GRAB,g.range);
-%     for i = 1:numel(GRAB)
-%         GRAB(i) = rerange(GRAB(i),g.range,g.sparemem);
-%     end
+    g.range = makerange(GRAB,g.range);
+    for i = 1:numel(GRAB)
+        GRAB(i) = rerange(GRAB(i),g.range,g.sparemem);
+    end
     if strncmp(g.loadmode,'eeglab',6)
         for i = 1:numel(GRAB)
             [ALLEEG] = eeg_store(ALLEEG,GRAB(i).EEG);
