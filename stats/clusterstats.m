@@ -1,4 +1,4 @@
-function [mask, pct,C] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh,channeighbstructmat,use_tfce)
+function [mask, pct,C,sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh,channeighbstructmat,use_tfce)
 
 % [mask pct] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh, channeighbstructmat,use_tfce)
 %
