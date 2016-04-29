@@ -142,6 +142,9 @@ if not(isempty(g.rename))
     r = input('Is this ok? (y/n)','s');
     if strcmpi(r,'y')
         for i_f = 1:numel(f)
+            if not(isdir(fileparts(nf{i_f})))
+                mkdir(fileparts(nf{i_f}));
+            end
             movefile(f(i_f).name,nf{i_f});
         end
     end
