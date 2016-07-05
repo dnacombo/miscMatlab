@@ -120,6 +120,12 @@ end
 for i = 1:numel(factnames)
     factlevelnames{i} = unique({f.(factnames{i})});
     finder = regexptranslate('escape',{f.(factnames{i})});
+    empty = cellfun(@isempty,factlevelnames{i});
+    if any(empty)
+        factlevelnames{i}{empty} = '{{empty}}';
+        empty = cellfun(@isempty,finder);
+        finder(empty) = {'{{empty}}'};
+    end
     factidx{i} = regexpcell(factlevelnames{i},finder,'exact');
 end
 if not(isempty(factnames))
