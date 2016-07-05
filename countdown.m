@@ -1,5 +1,6 @@
 function countdown(seconds)
 
+% countdown(seconds)
 % display a count down of seconds in the command window
 
 tic
