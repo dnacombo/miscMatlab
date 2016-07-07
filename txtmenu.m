@@ -101,12 +101,12 @@ headerLeader = '----- '; headerTrailer = ' -----';
 % Length for right strings is 1:
 % leftStr    = '';      rightStr    = ' ';
 % defLeftStr = '>> ';   defRightStr = ' ';
-% defLeftStr = '•';     defRightStr = ' ';
+% defLeftStr = 'ï¿½';     defRightStr = ' ';
 
 % Length for right strings is 2:
 leftStr    = '';      rightStr    = ') ';
 defLeftStr = '>> ';   defRightStr = ') ';
-% defLeftStr = '•';     defRightStr = ') ';
+% defLeftStr = 'ï¿½';     defRightStr = ') ';
 % leftStr    = '';      rightStr    = '  ';
 % defLeftStr = '<';     defRightStr = '> ';
 
@@ -114,23 +114,23 @@ defLeftStr = '>> ';   defRightStr = ') ';
 % leftStr    = '';      rightStr    = ' - ';
 % defLeftStr = '>> ';   defRightStr = ' - ';
 % defLeftStr = 'return/'; defRightStr = ' - ';
-% defLeftStr = '';      defRightStr = ' • ';
+% defLeftStr = '';      defRightStr = ' ï¿½ ';
 
 % Length for right strings is 4:
 % leftStr    = '';      rightStr    = '  - ';
-% defLeftStr = '«';     defRightStr = '» - ';
+% defLeftStr = 'ï¿½';     defRightStr = 'ï¿½ - ';
 % defLeftStr = '(';     defRightStr = ') - ';
 % defLeftStr = '<';     defRightStr = '> - ';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Figure out the inputs.
-narginchk(1,inf);
+% narginchk(1,inf);
 
 % Set default parameters.
 k = nan;
 prompt = 'Select a menu item:';
-default = '0';
+default = '1';
 
 if nargin == 1 && isstruct(varargin{1}) % Use struct input scheme
     S = varargin{1};
@@ -162,7 +162,7 @@ if nargin == 1 && isstruct(varargin{1}) % Use struct input scheme
             error('CHOICELIST and DESCLIST must be of equal length.')
         end
     else
-        choiceList = 0:numItems-1;
+        choiceList = 1:numItems;
     end
     if isfield(S,'default')
         default = S.default;
@@ -230,7 +230,7 @@ else % Use normal input scheme
     end
     
     numItems = length(itemList);
-    choiceList = 0:numItems-1;
+    choiceList = 1:numItems;
 end
 
 %% A little more input processing
@@ -286,7 +286,7 @@ choiceList = cellfun(@num2str,choiceList,'UniformOutput',false);
 % Must preserve list before appending and prepending stuff in order to
 % check matches for inputs
 choiceListStr = choiceList;
-if ~isequal(choiceList,unique(choiceList,'stable'))
+if ~isequal(sort(choiceList),unique(choiceList))
     error('Choice list must have only unique entries.')
 end
 
@@ -361,10 +361,13 @@ while 1
         return
     end
     
+    k = str2num(k);
+    return
     % No success.
-    beep
-    disp(' ')
-    disp('Selection out of range. Try again.')
+%     
+%     beep
+%     disp(' ')
+%     disp('Selection out of range. Try again.')
 end
 
 
