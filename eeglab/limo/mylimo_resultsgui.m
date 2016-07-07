@@ -22,7 +22,7 @@ function varargout = mylimo_resultsgui(varargin)
 
 % Edit the above text to modify the response to help mylimo_resultsgui
 
-% Last Modified by GUIDE v2.5 04-Sep-2014 17:08:41
+% Last Modified by GUIDE v2.5 28-Jun-2016 16:14:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -82,7 +82,11 @@ function pushload_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-EEG = pop_loadset;
+if isa(eventdata,'matlab.ui.eventdata.ActionData')% gui button click
+    EEG = pop_loadset;
+else
+    EEG = pop_loadset(eventdata);
+end
 if isempty(EEG)
     try
         EEG = handles.EEG;
@@ -133,7 +137,7 @@ function push_eeg_simplesurf_Callback(hObject, eventdata, handles)
 handles.currentelec = 1;
 [t handles.currenttime] = timepts(0,handles.EEG.times);
 if all(handles.EEG.data(:) >= 0)
-	allpos = 1;
+    allpos = 1;
 else
     allpos = 0;
 end
@@ -151,10 +155,20 @@ else
     colormap(varycolor(256,'jet'))
     caxis([-max(abs(cx)) max(abs(cx))]);
 end
-if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file') && get(handles.check_T,'value')
+if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+    types = get(handles.pop_type,'String');
+    switch types{get(handles.pop_type,'Value')}
+        case 'mean'
+            coloraxis = 'Amplitude (\muV/Std)';
+        case 't'
     load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'n');
     coloraxis = ['t(' num2str(n(1)-1) ')'];
-elseif exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+        case 'BF'
+            coloraxis = 'Bayes Factor';
+        case 'logBF'
+            coloraxis = 'log10(Bayes Factor)';
+    end
+else%if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
     coloraxis = 'Amplitude (\muV/Std)';
 end
 h = colorbar;set(get(h,'ylabel'),'string',coloraxis,'fontsize',14);
@@ -175,17 +189,30 @@ title(handles.EEG.chanlocs(handles.currentelec).labels)
 handles.hsimplesurffig = figure(63854);clf;
 set(handles.hsimplesurffig,'numbertitle','off','color',handles.COLOR_BCG,'tag','ERPimage');
 tmpEEG = handles.EEG;
-if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file') && get(handles.check_T,'value')
+types = get(handles.pop_type,'String');
+if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+    switch types{get(handles.pop_type,'value')}
+        case 't'
     load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'t','n');
     tmpEEG.data = t;
     coloraxis = ['t(' num2str(n(1)-1) ')'];
-elseif exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+        case 'mean'
+
     load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'m');
     tmpEEG.data = m;
     coloraxis = 'Amplitude (\muV/Std)';
+        case 'BF'
+    load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'bf');
+    tmpEEG.data = bf;
+    coloraxis = 'Bayes Factor';
+        case 'logBF'
+    load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'bf');
+    tmpEEG.data = log10(bf);
+    coloraxis = 'log10(Bayes Factor)';
+    end
 end
 handles.EEG = tmpEEG;
-    
+
 [handles.hsimplesurffig, handles.hsimplesurf] = eeg_simplesurf(tmpEEG,[],handles.hsimplesurffig);
 set(handles.hsimplesurf,'Tag','simplesurf');
 set(get(handles.hsimplesurf,'parent'),'Tag','axessimplesurf');
@@ -199,12 +226,12 @@ else
     caxis([-max(abs(cx)) max(abs(cx))]);
 end
 h = colorbar;set(get(h,'ylabel'),'string',coloraxis,'fontsize',14);
-if get(handles.check_T,'value')
-    p = str2num(get(handles.edit_clustpthresh,'String')) / 2;
-%     delete(findobj('tag','threshlines'));
-%     line('parent',h,'ydata',tinv([p p],n(1)),'xdata',get(h,'XLim'),'color','k','tag','threshlines')
-%     line('parent',h,'ydata',tinv(1-[p p],n(1)),'xdata',get(h,'XLim'),'color','k','tag','threshlines')
-end
+% if get(handles.check_T,'value')
+%     p = str2num(get(handles.edit_clustpthresh,'String')) / 2;
+%     %     delete(findobj('tag','threshlines'));
+%     %     line('parent',h,'ydata',tinv([p p],n(1)),'xdata',get(h,'XLim'),'color','k','tag','threshlines')
+%     %     line('parent',h,'ydata',tinv(1-[p p],n(1)),'xdata',get(h,'XLim'),'color','k','tag','threshlines')
+% end
 figure(handles.hsimplesurffig);
 set(gcf,'windowButtonDownFcn',@updatERP)
 
@@ -248,49 +275,51 @@ if not(isfield(handles,'lastpos'))
     handles.lastpos = pos;
 end
 % depending on type of click
-switch get(gcbf,'selectiontype')
-    case 'normal'
-        % select this electrode and time point
-        [handles.currentelec] = find(newelecvector);
-        [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
-        [dum handles.currenttime] = timepts(pos(1));
-        handles.lasttime = handles.currenttime;
-        handles.lastelec = handles.currentelec;
-    case 'alt'
-        % add/remove this electrode to/from selection
-        handles.currentelec = find(xor(elecvector, newelecvector));
-        [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
-        [dum handles.currenttime] = timepts(pos(1));
-        handles.lasttime = handles.currenttime;
-        handles.lastelec = find(newelecvector);
-    case 'extend'
-        % extend selection to electrodes or time points, which ever is
-        % closest
-        if diff(abs(pos - handles.lastpos)./[diff(xl) diff(yl)]) >= 0
-            % elec range
-            newsel = handles.lastelec:sign(find(newelecvector)-handles.lastelec):find(newelecvector);
-            handles.currentelec = [handles.currentelec newsel];
+if not(isempty(get(gcbf,'selectiontype')))
+    switch get(gcbf,'selectiontype')
+        case 'normal'
+            % select this electrode and time point
+            [handles.currentelec] = find(newelecvector);
+            [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
+            [dum handles.currenttime] = timepts(pos(1));
+            handles.lasttime = handles.currenttime;
+            handles.lastelec = handles.currentelec;
+        case 'alt'
+            % add/remove this electrode to/from selection
+            handles.currentelec = find(xor(elecvector, newelecvector));
             [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
             [dum handles.currenttime] = timepts(pos(1));
             handles.lasttime = handles.currenttime;
             handles.lastelec = find(newelecvector);
-        else
-            % time range
-            [handles.currentelec] = find(newelecvector);
-            [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
-            handles.lastelec = handles.currentelec;
-            [ dum tclick] = timepts(pos(1));
-            if sign(tclick-handles.lasttime) >= 0
-                tmp = [handles.lasttime tclick];
+        case 'extend'
+            % extend selection to electrodes or time points, which ever is
+            % closest
+            if diff(abs(pos - handles.lastpos)./[diff(xl) diff(yl)]) >= 0
+                % elec range
+                newsel = handles.lastelec:sign(find(newelecvector)-handles.lastelec):find(newelecvector);
+                handles.currentelec = [handles.currentelec newsel];
+                [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
+                [dum handles.currenttime] = timepts(pos(1));
+                handles.lasttime = handles.currenttime;
+                handles.lastelec = find(newelecvector);
             else
-                tmp = [tclick handles.lasttime];
+                % time range
+                [handles.currentelec] = find(newelecvector);
+                [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
+                handles.lastelec = handles.currentelec;
+                [ dum tclick] = timepts(pos(1));
+                if sign(tclick-handles.lasttime) >= 0
+                    tmp = [handles.lasttime tclick];
+                else
+                    tmp = [tclick handles.lasttime];
+                end
+                [dum handles.currenttime] = timepts(tmp);
+                [dum handles.lasttime] = timepts(pos(1));
             end
-            [dum handles.currenttime] = timepts(tmp);
-            [dum handles.lasttime] = timepts(pos(1));
-        end
+    end
+    handles.lastpos = pos;
+    handles.lastelec = handles.currentelec;
 end
-handles.lastpos = pos;
-handles.lastelec = handles.currentelec;
 drawfigs(handles)
 guidata(handles.figure1,handles);
 
@@ -319,10 +348,10 @@ figure(handles.hplotfig)
 clf
 [handles.currentelec dum handles.currentelecnamestr] = chnb(handles.currentelec);
 set(gcf,'name',['Time course at ' handles.currentelecnamestr])
-try 
+try
     tmp = load(handles.EEG.statsfile,'m');
     toplot = tmp.m;
-catch 
+catch
     toplot = EEG.data;
 end
 h = plot(EEG.times,toplot(handles.currentelec,:),'linewidth',2);
@@ -347,8 +376,8 @@ end
 legend(h,l,'fontsize',12)
 xlabel('Time (s)','FontSize',14)
 ylabel('Amplitude (\muV/Std)','FontSize',14)
-xtick([0 min(xl(2),.2)],'fontsize',14)
-ytick([0 min(yl(2),1)],'fontsize',14)
+% xtick([0 min(xl(2),.2)],'fontsize',14)
+% ytick([0 min(yl(2),1)],'fontsize',14)
 
 box off
 hold off
@@ -390,11 +419,11 @@ for i = 1:numel(X)
         mksiz = 16;
     end
     plot3(X(i),Y(i),5,'.k',...
-    'ButtonDownFcn',['handles = guidata(get(gcf,''UserData''));elecvec = false(1,handles.EEG.nbchan);newelecvec = elecvec;elecvec(handles.currentelec) =1;newelecvec(chnb(' num2str(i) ')) = 1; handles.currentelec = find(xor(elecvec, newelecvec)); ' ... 
-    'guidata(get(gcf,''UserData''),handles);mylimo_resultsgui(''drawfigs'',handles);clear handles;'],...
-    'markersize',mksiz);
-%         'ButtonDownFcn',['chnb(' num2str(i) ')'],...
-%         'markersize',mksiz);
+        'ButtonDownFcn',['handles = guidata(get(gcf,''UserData''));elecvec = false(1,handles.EEG.nbchan);newelecvec = elecvec;elecvec(handles.currentelec) =1;newelecvec(chnb(' num2str(i) ')) = 1; handles.currentelec = find(xor(elecvec, newelecvec)); ' ...
+        'guidata(get(gcf,''UserData''),handles);mylimo_resultsgui(''drawfigs'',handles);clear handles;'],...
+        'markersize',mksiz);
+    %         'ButtonDownFcn',['chnb(' num2str(i) ')'],...
+    %         'markersize',mksiz);
 end
 %%%
 if numel(handles.currenttime) > 1
@@ -402,10 +431,20 @@ if numel(handles.currenttime) > 1
 else
     title({handles.currentelecnamestr [num2str(round(handles.currenttime(1)*100)/100,'%0.2g0') ' s']})
 end
-if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file') && get(handles.check_T,'value')
+if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+    types = get(handles.pop_type,'String');
+    switch types{get(handles.pop_type,'Value')}
+        case 'mean'
+            coloraxis = 'Amplitude (\muV/Std)';
+        case 't'
     load(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'n');
     coloraxis = ['t(' num2str(n(1)-1) ')'];
-elseif exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
+        case 'BF'
+            coloraxis = 'Bayes Factor';
+        case 'logBF'
+            coloraxis = 'log10(Bayes Factor)';
+    end
+else%if exist(strrep(fullfile(handles.EEG.filepath,handles.EEG.filename),'.set','.mat'),'file')
     coloraxis = 'Amplitude (\muV/Std)';
 end
 
@@ -495,7 +534,7 @@ function push_robustSTAT_Callback(hObject, eventdata, handles)
 
 try
     fprintf('Loading saved robust cluster mask... ')
-
+    
     s = warning('off','MATLAB:load:variableNotFound');
     load(handles.EEG.statsfile,'STATpthresh');
     load(handles.EEG.statsfile,'STATClustpthresh');
@@ -533,7 +572,7 @@ catch
         warning(s.state,s.identifier);
         idxelecs = regexpcell({handles.EEG.chanlocs.labels}, {expected_chanlocs.labels},'exactignorecase');
         handles.stats.channeighbstructmat = channeighbstructmat(idxelecs,idxelecs);
-%         figure;pcolor(channeighbstructmat);
+        %         figure;pcolor(channeighbstructmat);
         fprintf('done\n')
     catch
         fprintf('failed.\n')
@@ -579,8 +618,8 @@ catch
                 case 'Cancel'
                     return
             end
-%             pop_showneighb(channeighbstructmat,expected_chanlocs)
-%             uiwait(gcf)
+            %             pop_showneighb(channeighbstructmat,expected_chanlocs)
+            %             uiwait(gcf)
             r = 'Yes';%questdlg('Neighborhood ok?','Creating new neighborhood matrix','Yes','No','Cancel','Cancel');
             switch r
                 case 'Yes'
@@ -597,7 +636,7 @@ catch
     for i = 1:size(channeighbstructmat,1)
         channeighbstructmat(i,i:end) = 0;
     end
-%     figure;pcolor(channeighbstructmat);
+    %     figure;pcolor(channeighbstructmat);
     fprintf('Computing cluster size correction for multiple comparisons... \n')
     handles.stats.STATsepposneg = get(handles.check_posneg,'value');
     if handles.stats.STATsepposneg
@@ -643,7 +682,7 @@ catch
     end
     handles.stats.STATmask = mask;
     handles.stats.STATpct = pct;
-%     [handles.stats.STATmask pct] = clusterstats(stats.boottH0.^2, stats.bootpH0,stats.t.^2,stats.p,handles.stats.STATClustpthresh,handles.stats.STATpthresh,handles.stats.channeighbstructmat);
+    %     [handles.stats.STATmask pct] = clusterstats(stats.boottH0.^2, stats.bootpH0,stats.t.^2,stats.p,handles.stats.STATClustpthresh,handles.stats.STATpthresh,handles.stats.channeighbstructmat);
     struct2ws(handles.stats);
     save(handles.EEG.statsfile,'-append','STATClustpthresh','STATpthresh','STATmask','STATpct');
     fprintf('done\n')
@@ -764,7 +803,7 @@ update_textloaded(handles);
 function handles = gimme_handles(name)
 
 % handles = gimme_handles(name)
-% retrieve the handles for the gui called name (str) 
+% retrieve the handles for the gui called name (str)
 
 prev = get(0,'ShowHiddenHandles');
 set(0,'ShowHiddenHandles','on');
@@ -915,19 +954,6 @@ function check_snapres_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of check_snapres
 
-
-% --- Executes on button press in check_T.
-function check_T_Callback(hObject, eventdata, handles)
-% hObject    handle to check_T (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of check_T
-push_eeg_simplesurf_Callback(handles.push_eeg_simplesurf, eventdata, handles)
-updatestatview(handles)
-updatERP(handles.hsimplesurffig,[])
-
-
 % --- Executes on button press in check_contour.
 function check_contour_Callback(hObject, eventdata, handles)
 % hObject    handle to check_contour (see GCBO)
@@ -938,3 +964,29 @@ function check_contour_Callback(hObject, eventdata, handles)
 push_eeg_simplesurf_Callback(handles.push_eeg_simplesurf, eventdata, handles)
 handles = guidata(hObject);
 check_robust_Callback(handles.check_robust, eventdata, handles)
+
+
+% --- Executes on selection change in pop_type.
+function pop_type_Callback(hObject, eventdata, handles)
+% hObject    handle to pop_type (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns pop_type contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from pop_type
+push_eeg_simplesurf_Callback(handles.push_eeg_simplesurf, eventdata, handles)
+updatestatview(handles)
+updatERP(handles.hsimplesurffig,[])
+
+
+% --- Executes during object creation, after setting all properties.
+function pop_type_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pop_type (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
