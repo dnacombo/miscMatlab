@@ -23,3 +23,7 @@ end
 EEG.data(end+1,:) = mean(EEG.data(chnb(chan1),:),1) - mean(EEG.data(chnb(chan2),:),1);
 EEG.chanlocs(end+1).labels = name;
 EEG.chanlocs(end).type = type;
+
+
+com = sprintf('EEG = pop_chandiff( %s,%s);', inputname(1), vararg2str({chan1,chan2,name,type}));
+

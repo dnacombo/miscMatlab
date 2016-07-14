@@ -16,5 +16,6 @@ c = EEG.chanlocs(chnb(chan1));
 EEG.chanlocs(chnb(chan1)) = EEG.chanlocs(chnb(chan2));
 EEG.chanlocs(chnb(chan2)) = c;
 
+com = sprintf('EEG = pop_chanswap( %s,%s);', inputname(1), vararg2str({chan1, chan2}));
 
 

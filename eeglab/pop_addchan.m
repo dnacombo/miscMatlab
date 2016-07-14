@@ -30,3 +30,5 @@ EEG.data(end+1,:) = dat(:);
 EEG.chanlocs(end+1).labels = name;
 EEG.chanlocs(end).type = type;
 EEG.nbchan = EEG.nbchan+1;
+
+com = sprintf('EEG = pop_addchan( %s,%s);', inputname(1), vararg2str({['[data ' num2str(size(dat),'%d ') ']'],name,type}));

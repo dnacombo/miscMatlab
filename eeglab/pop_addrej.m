@@ -17,3 +17,6 @@ EEG.reject.(['rej' name 'E']) = zeros(EEG.nbchan,EEG.trials);
 EEG.reject.(['rej' name 'col']) = col;
 
 EEG.reject.disprej{end+1} = name;
+
+
+com = sprintf('EEG = pop_addrej( %s,%s);', inputname(1), vararg2str({name,rej,col}));
