@@ -3,6 +3,9 @@ function c = num2cellstr(num,fmt)
 % creates a cell array of strings containing numel(num) strings using
 % numstr(num) using format string fmt
 %
+if nargin == 1
+    fmt = '%d';
+end
 c = cell(size(num));
 for i = 1:numel(num)
     c{i} = num2str(num(i),fmt);
