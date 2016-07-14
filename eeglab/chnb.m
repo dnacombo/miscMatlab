@@ -30,7 +30,12 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %   strnames      - Channel names, one line character array.
 error(nargchk(1,2,nargin));
 if nargin == 2
-    labels = varargin{1};
+    if isstruct(varargin{1}) && isfield(varargin{1},'setname')
+        % assume it's an EEG dataset
+        labels = {varargin{1}.chanlocs.labels};
+    else
+        labels = varargin{1};
+    end
 else
     
     try
