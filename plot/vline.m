@@ -44,9 +44,6 @@ if any(c)
         set(h,'color',cs(1,:))
     end
 end
-if not(isempty(varargin))
-    set(h, varargin{:});
-end
 if not(ho)
     hold off
 end
