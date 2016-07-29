@@ -14,9 +14,12 @@ function [rgb] = colors(name)
 % [rgb] = colors
 % returns all available rgb triplets
 %
+% [name] = colors(rgb)
+% if input is numeric, attempt matching with known colors to find name;
 %
+% 
 
-% v0. Max 2016
+% v0.1 Max 2016
 
 if nargin == 0
     if nargout == 0
@@ -687,6 +690,14 @@ cols = {
     'yellowgreen'	154	205	50
     };
 cols(:,2:end) = cellfun(@(x)x/255,cols(:,2:end),'uniformoutput',0);
+
+if isnumeric(name)
+    rgb = round(name*1000)/1000;
+    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
+    icol = all(bsxfun(@eq,rgb,allcols),2);
+    rgb = cols{icol,1};
+    return
+end
 
 if strcmp(name,'list')
     rgb = cols(:,1);
