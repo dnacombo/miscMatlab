@@ -118,8 +118,16 @@ function push_pop_topoplot_Callback(hObject, eventdata, handles)
 % hObject    handle to push_pop_topoplot (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-pop_topoplot(handles.EEG);
+lat = inputdlg('latencies');
+if isempty(lat)
+    return;
+end
+lat = str2num(lat{1});
+if isfield(handles.stats,'STATmask')
+    handles.EEG.mask = handles.stats.STATmask;
+    opts = {'chanmask','mask'};
+end
+pop_topoplot(handles.EEG,1,lat,handles.EEG.setname,[],0,opts{:});
 
 % --- Executes during object creation, after setting all properties.
 function push_pop_topoplot_CreateFcn(hObject, eventdata, handles)
