@@ -16,6 +16,7 @@ EEG.reject.(['rej' name])(rej) = 1;
 EEG.reject.(['rej' name 'E']) = zeros(EEG.nbchan,EEG.trials);
 EEG.reject.(['rej' name 'col']) = col;
 
+EEG.reject.disprej(strcmp(EEG.reject.disprej,name)) = [];
 EEG.reject.disprej{end+1} = name;
 
 
