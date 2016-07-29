@@ -50,8 +50,9 @@ function GRAB = datagrabber(re,varargin)
 %       and will just attempt to pick from it with the new range structure.
 % 'exclude', str
 %       File names matching regexp str will be excluded from the grab
-% 'sparemem', boolean
-%       Clear excluded data range from memory.
+% 'onload', str
+%       Will execute str just after loading the EEG file.
+%       EEG is a valid variable name in str.
 
 global ALLEEG STUDY
 
@@ -77,7 +78,8 @@ g = finputcheck( varargin, ...
     'promptorderwithin' 'boolean' [] true
     'waitafterlisting' 'boolean' [] false
     'simpleloadwhat' 'string' '' ''
-    'dir','string','',cd});
+    'dir','string','',cd
+    'onload','string','',''});
 if isstr(g)
     error(g);
 end
@@ -168,6 +170,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%% list all files matching re
 [f] = flister(re,'exclude',g.exclude,'dir',g.dir);
+if isempty(f)
+    error('no file found')
+end
 % now we have listed all the files and attributed factors as defined in re
 % to them.
 % r = questdlg({['I''ve found ' num2str(numel(f)) ' files.'] 'Move on?'});
@@ -220,7 +225,7 @@ grabif = regexpcell(grabfs,grabf,'exact');
 
 % if we get here, we have to read and rerange the data.
 if numel(grabf)
-    [GRAB sfact] = computecond(GRAB,1);
+    [GRAB, sfact] = computecond(GRAB,1);
 else
     sfact = [];
 end
@@ -228,7 +233,11 @@ end
 for i_f = 1:numel(GRAB)
     % here we read the data.
     if ~strcmp(g.loadmode,'simple') && ~strcmp(g.loadmode,'info')
-        GRAB(i_f).EEG = pop_loadset(f(i_f).name);
+        EEG = pop_loadset(f(i_f).name);
+        if ~isempty(g.onload)
+            eval(g.onload)
+        end
+        GRAB(i_f).EEG = EEG;
     end
     GRAB(i_f).name = f(i_f).name;
     for i = 1:numel(grabf)
@@ -280,7 +289,7 @@ if not(isempty(revts))
                 continue
             end
             evts = elister(revts,GRAB(i_s,i_c).EEG.event);% list all events in grabbed data.
-            evts = reevt(evts, g.promptorderwithin);% select those that are relevant
+            [evts, shape] = reevt(evts, g.promptorderwithin);% select those that are relevant
             g.promptorderwithin = false;
             % replicate that GRAB along the 3d dimension as many times as
             % we have conditions.
@@ -302,7 +311,7 @@ if not(isempty(revts))
                     end
                     str = [str evtfs{i} GRAB(i_s,i_c,ic).evts(1).(evtfs{i})];
                     if not(i == numel(evtfs))
-                        str = [str '_'];
+                        str = [str ':'];
                     end
                 end
                 if not(isempty(GRAB(i_s,i_c,ic).condname))
@@ -316,6 +325,8 @@ if not(isempty(revts))
             end
         end
     end
+    GRAB = reshape(GRAB,[size(GRAB,1),size(GRAB,2),shape]);
+    GRAB(1).nconds = nconds;
 else
     disp('No conditions based on events. I guess you gave me conditions as files.');
     if isfield(GRAB,'nconds') && GRAB(1).nconds == 1
@@ -362,29 +373,31 @@ else% we must remove out of bounds requested trials
 end
 %%%%%%
 
-GRAB.data = GRAB.EEG.data(GRAB.range.channels.idx, GRAB.range.time.idx, GRAB.range.trials.idx);
-if 0%sparemem
-    %Here there's a bug. pop_select removes one time point at the end of
-    %the epochs. It's actually in epoch.m that there's a (-1) somewhere.
-    GRAB.EEG = pop_select(GRAB.EEG,'time',GRAB.range.time.lims/1000,'channel',GRAB.range.channels.idx, 'trial', GRAB.range.trials.idx);
-    disp('Cleared unused data.')
-end
+%Here there's a bug. pop_select removes one time point at the end of
+%the epochs. It's actually in epoch.m that there's a (-1) somewhere.
+GRAB.EEG = pop_select(GRAB.EEG,'time',GRAB.range.time.lims/1000,'channel',GRAB.range.channels.idx, 'trial', GRAB.range.trials.idx);
+
+GRAB.data = GRAB.EEG.data;
 
 for i_dim = 1:numel(supported_dimensions)
-    switch GRAB.range.(supported_dimensions{i_dim}).oper
-        case 'none'
-        case 'mean'
-            GRAB.data = mean(GRAB.data,i_dim);
-        case 'std'
-            GRAB.data = std(GRAB.data,[],i_dim);
-        case 'max'
-            GRAB.data = max(GRAB.data,[],i_dim);
-        case 'min'
-            GRAB.data = min(GRAB.data,[],i_dim);
+    if isa(GRAB.range.(supported_dimensions{i_dim}).oper,'function_handle')
+        GRAB.data = GRAB.range.(supported_dimensions{i_dim}).oper(GRAB.data);
+    else
+        switch GRAB.range.(supported_dimensions{i_dim}).oper
+            case 'none'
+            case 'mean'
+                GRAB.data = mean(GRAB.data,i_dim);
+            case 'std'
+                GRAB.data = std(GRAB.data,[],i_dim);
+            case 'max'
+                GRAB.data = max(GRAB.data,[],i_dim);
+            case 'min'
+                GRAB.data = min(GRAB.data,[],i_dim);
+        end
     end
 end
 
-function evts = reevt(evts, promptorder)
+function [evts shape] = reevt(evts, promptorder)
 
 persistent s
 evtfs = fieldnames(evts);
@@ -401,11 +414,11 @@ else
     f = strrep(fidx,'idx','');
     idx = regexpcell(evtfs,f,'exact');
     for i_f = 1:numel(f)
-        nf(i_f) = numel(unique({evts.(f{i_f})}));
+        shape(i_f) = numel(unique({evts.(f{i_f})}));
     end
 end
 if isempty(f)
-    nf = 1;
+    shape = 1;
     promptorder = 0;
 end
 
@@ -426,10 +439,11 @@ if promptorder && numel(f) > 1
 elseif not(isempty(s))
     % this should be the order specified on the previous call.
 else
-    s = 1:numel(nf);
+    s = 1:numel(shape);
 end
 fidx = fidx(s);
 f = f(s);
+shape = shape(s);
 evtfs(iidx) = fidx;
 evtfs(idx) = f;
 evtfs = {'event' 'eventidx' evtfs{:}};
