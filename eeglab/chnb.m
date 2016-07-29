@@ -70,6 +70,8 @@ if iscell(channame) || ischar(channame)
         end
         if isempty(channame)
             nb = [];
+            channame = {};
+            strnames = '';
             return
         end
     end
