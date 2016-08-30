@@ -1,4 +1,4 @@
-function [nb,channame,strnames] = chty(channame, varargin)
+function [nb,channame,strnames] = chty(chantype, varargin)
 
 % chnb() - return channel number corresponding to channel names in an EEG
 %           structure
@@ -55,4 +55,4 @@ else
     types = {EEG.chanlocs.type};
 end
 
-[nb,channame,strnames] = chnb(channame, types);
+[nb,channame,strnames] = chnb(chantype, types);
