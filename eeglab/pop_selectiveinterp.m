@@ -32,7 +32,8 @@ function varargout = pop_selectiveinterp(EEG, varargin)
 if nargin == 1
     rejE = EEG.reject.rejmanualE;
 elseif nargin == 2
-    rejE = varargin{1};
+    rej = varargin{1};
+    rejE = struct2rejE(rej,EEG);
 elseif nargin > 2
     if rem(numel(varargin),2)
         error('[elec, trials] input should come in pairs.');
@@ -41,12 +42,8 @@ elseif nargin > 2
         rej(i).name = varargin{2*i-1};
         rej(i).trials = varargin{2*i};
     end
-    rejE = false(size(EEG.data,1),size(EEG.data,3));
-    for i = 1:numel(rej)
-        rejE(chnb(rej(i).name),rej(i).trials) = true;
-    end
+    rejE = struct2rejE(rej,EEG);
 end
-
 if any(rejE(:))
     GUIBACKCOLOR = [  0.6600    0.7600    1.0000];
     rep = questdlg('Now I am going to interpolate single electrodes you have marked.');
@@ -62,15 +59,15 @@ if any(rejE(:))
             if nargin == 1
                 EEG.reject.rejmanualE = zeros(size(EEG.reject.rejmanualE));
                 EEG.reject.rejmanual(trials) = 0;
-                strcom = 'EEG = pop_selectiveinterp(EEG';
-                for i = 1:numel(interp)
-                    [dum ename] = chnb(interp(i).name);
-                    strcom = [strcom ', ''' ename{1} ''', [' num2str(interp(i).trials') ']'];
-                end
-                strcom = [strcom ');'];
-                varargout{2} = strcom;
             end
             varargout{1} = EEG;
+            strcom = 'EEG = pop_selectiveinterp(EEG';
+            for i = 1:numel(interp)
+                [dum ename] = chnb(interp(i).name);
+                strcom = [strcom ', ''' ename{1} ''', [' num2str(interp(i).trials') ']'];
+            end
+            strcom = [strcom ');'];
+            varargout{2} = strcom;
         case 'No'
             [dum EEG.selectiveinterp] = rejE2struct(rejE);
             varargout{1} = EEG;
@@ -85,12 +82,19 @@ else
     varargout{2} = '';
     return;
 end
+
 function [trials interp] = rejE2struct(rejE)
 [elecs,trials] = find(rejE);
 ew = unique(elecs);
 for iel = 1:numel(ew)
     interp(iel).name = ew(iel);
     interp(iel).trials = trials(elecs == ew(iel));
+end
+function rejE = struct2rejE(rej,EEG)
+
+rejE = false(size(EEG.data,1),size(EEG.data,3));
+for i = 1:numel(rej)
+    rejE(chnb(rej(i).name),rej(i).trials) = true;
 end
 
 
