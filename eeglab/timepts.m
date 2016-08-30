@@ -23,9 +23,13 @@ function [tpts tvals] = timepts(timein, varargin)
 
 error(nargchk(1,2,nargin));
 if nargin == 2
-    times = varargin{1};
+    if isstruct(varargin{1}) && isfield(varargin{1},'setname')
+        % assume it's an EEG dataset
+        times = varargin{1}.times;
+    else
+        times = varargin{1};
+    end
 else
-    
     try
         EEG = evalin('caller','EEG');
     catch
