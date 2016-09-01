@@ -3,7 +3,7 @@ function [d] = baseline_corr(d,dim,bl,type)
 % [d] = baseline_corr(d,dim,bl,type)
 % baseline correct data d, with values extracted from d at indices bl along
 % dimension dim.
-% type is either 'sub', 'div' or 'divlog'
+% type is either 'sub', 'div' or 'divlog' (default 'sub')
 % all arguments but d are optional.
 
 if not(exist('dim','var'))||isempty(dim)
