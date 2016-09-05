@@ -5,7 +5,11 @@ function s = setdef(s,d)
 % Keeping order of fields same as in d
 
 if isstruct(s) && not(isempty(s))
-    fields = fieldnames(d);
+    if not(isstruct(d))
+        fields = [];
+    else
+        fields = fieldnames(d);
+    end
     for i_f = 1:numel(fields)
         if isfield(s,fields{i_f})
             s.(fields{i_f}) = setdef(s.(fields{i_f}),d.(fields{i_f}));
