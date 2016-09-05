@@ -4,8 +4,10 @@ function EEG = mat2eeglab(mat,EEGi)
 % 
 % Put a data matrix (2-3D) in an EEG structure using what's already in it.
 %
-
-EEG = EEGi;
+if not(exist('EEGi','var'))
+    EEGi = [];
+end
+EEG = setdef(EEGi,eeg_emptyset);
 if isstr(mat)
     strmat = mat;
     mat = load(mat);
@@ -22,17 +24,13 @@ else
     strmat = [strmat '] data>'];
 end
 
-EEG.chanlocs = EEGi.chanlocs;
 EEG.nbchan = numel(EEG.chanlocs);
-EEG.chaninfo = EEGi.chaninfo;
-EEG.xmin = EEGi.xmin;
-EEG.srate = EEGi.srate;
 EEG.pnts = size(mat,2);
-EEG.xmax = EEG.xmin + (EEG.pnts-1)/EEG.srate;
 EEG.trials = size(mat,3);
+EEG.xmax = EEG.xmin + (EEG.pnts-1)/EEG.srate;
 
 EEG.data = mat;
 
-EEG.history = [EEGi.history sprintf('EEG = mat2eeglab(%s)',strmat)];
+EEG = eegh(sprintf('EEG = mat2eeglab(%s)',strmat),EEG);
 
 EEG = eeg_checkset(EEG);
