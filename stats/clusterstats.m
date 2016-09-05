@@ -1,6 +1,33 @@
 function [mask, pct,C,sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh,channeighbstructmat,use_tfce)
 
-% [mask pct] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh, channeighbstructmat,use_tfce)
+% [mask pct C sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh, channeighbstructmat,use_tfce)
+%
+% inputs:
+%   StatPerm:       matrix of permuted statistic. up to 4D array where last
+%                   dimension is permutations
+%   pperm:          pvalues associated with StatPerm
+%   Stat:           matrix of original statistic. up to 3D.
+%   p:              pvalues associated with Stat
+%   clustthresh:    threshold pvalue to include clusteres of Stat and
+%                   StatPerm in cluster size computation
+%   finalpthresh:   pvalue of the test
+%   channeighbstructmat: 2 d matrix describing connectivity along the first
+%                   dimension of StatPerm and Stat.
+%   use_tfce:       NOT WORKING: use tfce method instead of this fixed threshold method
+%                   (call tfce.m). (see Smith and Nichols 2009) 
+% outputs:
+%   mask:           logical matrix, the same size as input Stat, true where
+%                   clusters in Stat are considered significant.
+%   C:              all N clusters found in Stat, numbered from 1 to N
+%   pct:            proportion of permuted clusters smaller than each of
+%                   the clusters returned in C
+%   sig:            cluster indices in C, that are significant.
+%
+% alternate input-output method:
+%           [statsout] = clusterstats(statsin)
+%
+% where statsin should contain fields named after the inputs above and
+% returned statsout the outputs described above.
 %
 % Return a mask of clusters of contiguous points in 4D matrix pperm.
 % Clusters are delineated as values of pperm that are below clustpthresh.
@@ -14,16 +41,23 @@ function [mask, pct,C,sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, 
 % if use_tfce is true, then use tfce method instead of this fixed threshold
 % method (call tfce.m). (see Smith and Nichols 2009)
 
-try
-    narginchk(4,8)
-catch
-    error(nargchk(4,8,nargin))
-end
-if nargin < 7
-    channeighbstructmat = [];
-end
-if nargin < 8
-    use_tfce = false;
+if nargin == 1 % assume one structure input
+    def.channeigbstruuctmat = [];
+    def.use_tfce = false;
+    StatPerm = setdef(StatPerm,def);
+    struct2ws(StatPerm)
+else
+    try
+        narginchk(4,8)
+    catch
+        error(nargchk(4,8,nargin))
+    end
+    if nargin < 7
+        channeighbstructmat = [];
+    end
+    if nargin < 8
+        use_tfce = false;
+    end
 end
 
 % if we have less than four dimensions, we'll insert dummy singleton
@@ -58,12 +92,15 @@ else
         else
             StatPerm_loc = StatPerm(:,:,:,i_perm);
             pperm_loc = pperm(:,:,:,i_perm);
+            if ~islogical(pperm_loc)
+                pperm_loc = pperm_loc <= clustpthresh;
+            end
             % first find clusters with matlab's bwlabeln for each boot
             if size(StatPerm,1) == 1
-                [C nb] = bwlabeln(pperm_loc <= clustpthresh);
+                [C nb] = bwlabeln(pperm_loc);
             else % if we also have channels, use
                 % findcluster function (from fieldtrip toolbox) to find clusters.
-                [C nb] = findcluster(pperm_loc <= clustpthresh, channeighbstructmat);
+                [C nb] = findcluster(pperm_loc, channeighbstructmat);
             end
             sizeclusts = 0;
             for ic = 1:nb
@@ -129,7 +166,13 @@ if verbose
     ylabel('permutations')
     xlabel('cluster size')
 end
-
+if nargout == 1 % output one structure
+    mask = struct('mask',mask);
+    mask.pct = pct;
+    mask.C = C;
+    mask.sig = sig;
+end
+    
 
 
 function [cluster, num] = findcluster(onoff, spatdimneighbstructmat, varargin)
