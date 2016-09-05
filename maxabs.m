@@ -9,6 +9,6 @@ if ~exist('opt','var') || isempty(opt)
     opt = '';
 end
 m = max(abs(a(:)));
-if not(isempty(strfind(opt,'+-')))
+if not(isempty(strfind(opt,'+-'))) || not(isempty(strfind(opt,'-+')))
     m = [-m m];
 end
