@@ -7,6 +7,7 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %   >> [nb]                 = chnb(channameornb);
 %   >> [nb,names]           = chnb(channameornb,...);
 %   >> [nb,names,strnames]  = chnb(channameornb,...);
+%   >> [nb]                 = chnb(channameornb, EEG);
 %   >> [nb]                 = chnb(channameornb, labels);
 %
 % Input:
@@ -32,7 +33,7 @@ error(nargchk(1,2,nargin));
 if nargin == 2
     if isstruct(varargin{1}) && isfield(varargin{1},'setname')
         % assume it's an EEG dataset
-        labels = {varargin{1}.chanlocs.labels};
+        labels = {varargin{1}(1).chanlocs.labels};
     else
         labels = varargin{1};
     end
