@@ -5,9 +5,9 @@ function [nb,channame,strnames] = chty(chantype, varargin)
 %
 % Usage:
 %   >> [nb]                 = chnb(channameornb);
-%   >> [nb,names]           = chnb(channameornb,...);
-%   >> [nb,names,strnames]  = chnb(channameornb,...);
 %   >> [nb]                 = chnb(channameornb, type);
+%   >> [nb,names,strnames]  = chnb(channameornb, EEG);
+%   >> [nb,names,strnames]  = chnb(channameornb, type, label);
 %
 % Input:
 %   channameornb  - If a string or cell array of strings, it is assumed to
@@ -20,22 +20,27 @@ function [nb,channame,strnames] = chty(chantype, varargin)
 %                   'inv' is attached to it, the channels NOT matching the
 %                   pattern are returned.
 %   types         - Channel types as found in {EEG.chanlocs.type}.
+%   label         - Channel labels as found in {EEG.chanlocs.label}.
 %
 % Output:
-%   nb            - Channel numbers in labels, or in the EEG structure
+%   nb            - Channel numbers in type, or in the EEG structure
 %                   found in the caller workspace (i.e. where the function
 %                   is called from) or in the base workspace, if no EEG
 %                   structure exists in the caller workspace.
 %   names         - Channel names, cell array of strings.
 %   strnames      - Channel names, one line character array.
 
-error(nargchk(1,2,nargin));
-if nargin == 2
+error(nargchk(1,3,nargin));
+if nargin >= 2
     if isstruct(varargin{1}) && isfield(varargin{1},'setname')
         % assume it's an EEG dataset
         types = {varargin{1}.chanlocs.type};
+        labels = {varargin{1}.chanlocs.labels};
     else
         types = varargin{1};
+        if nargin == 3
+            labels = varargin{2};
+        end
     end
 else
     
@@ -55,4 +60,11 @@ else
     types = {EEG.chanlocs.type};
 end
 
-[nb,channame,strnames] = chnb(chantype, types);
+[nb] = chnb(chantype, types);
+if exist('labels','var')
+    channame = labels(nb);
+    strnames = sprintf('%s ',channame{:});
+else
+    channame = {};
+    strnames = '';
+end
