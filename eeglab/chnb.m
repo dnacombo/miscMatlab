@@ -29,7 +29,7 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %                   structure exists in the caller workspace.
 %   names         - Channel names, cell array of strings.
 %   strnames      - Channel names, one line character array.
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 if nargin == 2
     if isstruct(varargin{1}) && isfield(varargin{1},'setname')
         % assume it's an EEG dataset
@@ -124,7 +124,7 @@ function idx = regexpcell(c,pat, cmds)
 % v2 Maximilien Chaumon 02/03/2010 changed input method.
 %       inv,ignorecase,exact,combine are replaced by cmds
 
-error(nargchk(2,3,nargin))
+narginchk(2,3)
 if not(iscellstr(c))
     error('input c must be a cell array of strings');
 end

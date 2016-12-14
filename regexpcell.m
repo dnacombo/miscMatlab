@@ -19,7 +19,7 @@ function idx = regexpcell(c,pat, cmds)
 % v2 Maximilien Chaumon 02/03/2010 changed input method.
 %       inv,ignorecase,exact,combine are replaced by cmds
 
-error(nargchk(2,3,nargin))
+narginchk(2,3)
 if not(iscellstr(c))
     error('input c must be a cell array of strings');
 end

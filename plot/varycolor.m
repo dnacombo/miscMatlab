@@ -73,8 +73,8 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %
 % based on Daniel Helmick 8/12/2008
 
-error(nargchk(0,4,nargin))%correct number of input arguements??
-error(nargoutchk(0, 1, nargout))%correct number of output arguements??
+narginchk(0,4)%correct number of input arguements??
+nargoutchk(0, 1)%correct number of output arguements??
 
 if not(exist('numberOfColors','var')) || isempty(numberOfColors)
     numberOfColors = 256;

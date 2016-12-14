@@ -7,6 +7,7 @@ function [varargout] = rep2struct(varargin)
 % of elements as s, and has same size along dimension 1, then pass each
 % slice into s.target.
 
+varargout = cell(1,nargout);
 if numel(varargin) == 1
     dat = varargin{1};
     if numel(dat) == nargout
@@ -29,4 +30,4 @@ elseif numel(varargin) == nargout
 else
     error('Wrong number of arguments');
 end
-
+return

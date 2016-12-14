@@ -19,7 +19,7 @@ function output = findtextinmfiles(text,varargin)
 %                                             files)
 %                       'exclude', pattern: file name to exclude 
 %
-
+replace = [];
 setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1);
 
 if isstr(backup)

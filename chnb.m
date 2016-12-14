@@ -7,6 +7,7 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %   >> [nb]                 = chnb(channameornb);
 %   >> [nb,names]           = chnb(channameornb,...);
 %   >> [nb,names,strnames]  = chnb(channameornb,...);
+%   >> [nb]                 = chnb(channameornb, EEG);
 %   >> [nb]                 = chnb(channameornb, labels);
 %
 % Input:
@@ -28,25 +29,30 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %                   structure exists in the caller workspace.
 %   names         - Channel names, cell array of strings.
 %   strnames      - Channel names, one line character array.
-error(nargchk(1,2,nargin));
+narginchk(1,2);
 if nargin == 2
-    labels = varargin{1};
+    if isstruct(varargin{1}) && isfield(varargin{1},'setname')
+        % assume it's an EEG dataset
+        labels = {varargin{1}(1).chanlocs.labels};
+    else
+        labels = varargin{1};
+    end
 else
     
     try
-        data = evalin('caller','data');
+        EEG = evalin('caller','EEG');
     catch
         try
-            data = evalin('base','data');
+            EEG = evalin('base','EEG');
         catch
-            error('Could not find data structure');
+            error('Could not find EEG structure');
         end
     end
-    if not(isfield(data,'label'))
+    if not(isfield(EEG,'chanlocs'))
         error('No channel list found');
     end
-    data = data(1);
-    labels = data.label;
+    EEG = EEG(1);
+    labels = {EEG.chanlocs.labels};
 end
 if iscell(channame) || ischar(channame)
     
@@ -65,6 +71,8 @@ if iscell(channame) || ischar(channame)
         end
         if isempty(channame)
             nb = [];
+            channame = {};
+            strnames = '';
             return
         end
     end
@@ -116,7 +124,7 @@ function idx = regexpcell(c,pat, cmds)
 % v2 Maximilien Chaumon 02/03/2010 changed input method.
 %       inv,ignorecase,exact,combine are replaced by cmds
 
-error(nargchk(2,3,nargin))
+narginchk(2,3)
 if not(iscellstr(c))
     error('input c must be a cell array of strings');
 end

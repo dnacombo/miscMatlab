@@ -20,7 +20,7 @@ if nargin == 0
    help('whichx')
    return
 end% if
-error(nargchk(0,2,nargin))
+narginchk(0,2)
 output = [];
 if ispc
    tmp = eval(['{''' strrep(matlabpath,';',''',''') '''}']);
