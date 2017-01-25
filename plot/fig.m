@@ -3,7 +3,7 @@ function [h] = fig(varargin)
 % bypass builtin figure function to allow creating figures basic
 % rectangular geometry.
 %
-%   figure(geom,...)
+%   fig(geom,...)
 %
 %   with geom a number between 11 and 99 indicating how many rows and
 %   columns the resulting figure should size to.
