@@ -59,6 +59,7 @@ g = finputcheck( varargin, ...
     'eval' '' [] ''
     'evalfname' '' [] 'eval'
     'sortfields' {'string';'cell'} [] 'all'
+    'cmds' {'string'} [] ''
     });
 if ischar(g)
     error(g);
@@ -79,7 +80,7 @@ if isempty(g.list)
 else
     all = g.list;
 end
-filenames = all(regexpcell(all,re));
+filenames = all(regexpcell(all,re,g.cmds));
 if isempty(filenames)
     disp('All files filtered out');
     varargout{1} = [];
