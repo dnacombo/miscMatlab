@@ -1,3 +1,3 @@
-function xticklabel(labels)
+function xticklabel(labels,varargin)
 
-set(gca,'xticklabel',labels)
+set(gca,'xticklabel',labels,varargin{:})
