@@ -8,7 +8,7 @@ set(0,'ShowHiddenHandles','on');
 try
     handles = guidata(findobj('-regexp','name',name));
 catch
-    handles = [];
+    handles = findobj('-regexp','name',name);
 end
 set(0,'ShowHiddenHandles',prev);
 
