@@ -3,7 +3,9 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 % chnb() - return channel number corresponding to channel names in an EEG
 %           structure
 %
-% Usage:
+%   Optional: initialization (beginning of a script/function):
+%   >>                        chnb('labels',labels)
+%   Usage:
 %   >> [nb]                 = chnb(channameornb);
 %   >> [nb,names]           = chnb(channameornb,...);
 %   >> [nb,names,strnames]  = chnb(channameornb,...);
@@ -11,6 +13,9 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %   >> [nb]                 = chnb(channameornb, labels);
 %
 % Input:
+%   'labels',labels - initialize labels to the list in variable labels for
+%                   subsequent executions until clear all is called.
+%                   This uses a persistent variable
 %   channameornb  - If a string or cell array of strings, it is assumed to
 %                   be (part of) the name of channels to search. Either a
 %                   string with space separated channel names, or a cell
@@ -30,29 +35,34 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 %   names         - Channel names, cell array of strings.
 %   strnames      - Channel names, one line character array.
 narginchk(1,2);
+persistent labels
 if nargin == 2
-    if isstruct(varargin{1}) && isfield(varargin{1},'setname')
+    if ischar(channame) && strcmp(channame,'labels')
+        labels = varargin{1};
+        return
+    elseif isstruct(varargin{1}) && isfield(varargin{1},'setname')
         % assume it's an EEG dataset
         labels = {varargin{1}(1).chanlocs.labels};
     else
         labels = varargin{1};
     end
 else
-    
-    try
-        EEG = evalin('caller','EEG');
-    catch
+    if isempty(labels)
         try
-            EEG = evalin('base','EEG');
+            EEG = evalin('caller','EEG');
         catch
-            error('Could not find EEG structure');
+            try
+                EEG = evalin('base','EEG');
+            catch
+                error('Could not find EEG structure');
+            end
         end
+        if not(isfield(EEG,'chanlocs'))
+            error('No channel list found');
+        end
+        EEG = EEG(1);
+        labels = {EEG.chanlocs.labels};
     end
-    if not(isfield(EEG,'chanlocs'))
-        error('No channel list found');
-    end
-    EEG = EEG(1);
-    labels = {EEG.chanlocs.labels};
 end
 if iscell(channame) || ischar(channame)
     
