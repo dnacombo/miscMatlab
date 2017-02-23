@@ -229,6 +229,9 @@ if not(isnumeric(colorMap))
             varybrightness = 0;
             m = vertcat(m{:});
             ColorSet = varycolor(numberOfColors,m);
+            if toblack
+                ColorSet = ColorSet(end:-1:1,:);
+            end
         case 'gallery'
             figure;
             shows = {8 'auto' 0
