@@ -9,7 +9,7 @@ function [row, col,n] = num2rowcol(num,R)
 % if R is provided, it is the approximate ratio col/row
 
 if not(exist('R','var'))
-    R = 1;
+    R = 16/10;
 end
 col =ceil(sqrt( num .* R ));
 row = ceil(col./R);
