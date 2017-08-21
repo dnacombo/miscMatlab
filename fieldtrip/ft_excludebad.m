@@ -47,6 +47,8 @@ cfgbad.trl = [];
 cfgbad.trl(:,1) = [1 [event.sample] + [event.duration]+1]';
 cfgbad.trl(:,2) = [[event.sample]-1 cfg.hdr.nSamples]';
 cfgbad.trl(:,3) = 0;
+cfgbad.trl(cfgbad.trl(:,1)>=numel(data.time{1}),:) = [];
+
 data = ft_redefinetrial(cfgbad,data);
 
 
