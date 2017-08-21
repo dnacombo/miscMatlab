@@ -18,15 +18,21 @@ function output = findtextinmfiles(text,varargin)
 %                                             search for other than .m
 %                                             files)
 %                       'exclude', pattern: file name to exclude 
+%                       'recurse', boolean: whether to recurse through
+%                                           subdirectories or not
 %
 replace = [];
-setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1);
+setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1,'recurse',1);
 
 if isstr(backup)
     backup = str2num(backup);
 end
 
-fs = rdir(fullfile(where,'**', filesep,'*'));
+if recurse
+    fs = rdir(fullfile(where,'**', filesep,'*'));
+else
+    fs = dir(where);
+end
 if not(isempty(exclude))
     fs = fs(regexpcell({fs.name},exclude,'inv'));
 end
