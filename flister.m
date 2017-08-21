@@ -82,7 +82,7 @@ else
 end
 filenames = all(regexpcell(all,re,g.cmds));
 if isempty(filenames)
-    disp('All files filtered out');
+%     disp('All files filtered out');
     varargout{1} = [];
     return
 end
@@ -176,7 +176,7 @@ elseif nargout == 1
     varargout{1} = f;
 else
     for i = 1:numel(f)
-        if isdir(f(i).name)
+        if isdir(f(i).name) && ~g.isdir
             continue
         end
         [p fn e] = fileparts(f(i).name);
