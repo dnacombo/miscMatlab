@@ -12,7 +12,11 @@ if numel(varargin) == 1
     dat = varargin{1};
     if numel(dat) == nargout
         for i = 1:nargout
-            varargout{i} = dat(i);
+            if iscell(dat(i))
+                varargout{i} = dat{i};
+            else
+                varargout{i} = dat(i);
+            end
         end
     elseif size(dat,1) == nargout
         for i = 1:nargout
