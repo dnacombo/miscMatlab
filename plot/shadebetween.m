@@ -39,9 +39,11 @@ end
 if isvector(lower)
     lower = lower(:);
 end
-
 filled=[upper;flipud(lower)];
 xpoints=[xpoints;flipud(xpoints)];
+nans = isnan(filled) | isnan(xpoints);
+filled(nans) = [];
+xpoints(nans) = [];
 
 fillhandle=fill(xpoints,filled,color);%plot the data
 set(fillhandle,'EdgeColor',edge,'FaceAlpha',transparency,'EdgeAlpha',transparency);%set edge color
