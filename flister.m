@@ -1,7 +1,7 @@
-function [varargout] = flister(re,varargin)
+function [f,varargout] = flister(re,varargin)
 
-% [filenames, factnames,factidx,factlevelnames] = flister(re)
 % [fstruct] = flister(re,'key',val, ...)
+% [fstruct,u1,u2,u3,...] = flister(re)
 % 
 % This function lists all files matching re in the current directory and
 % subdirectories
@@ -34,17 +34,14 @@ function [varargout] = flister(re,varargin)
 %                           empty to force not sorting)
 %
 % outputs:
-%           filenames: cell of filenames with absolute path
-%           factnames: cell: all the factor names of the named tokens of re
-%           factlevelnames cell: the level names of each factor
-%           factidx:   cell: for each factor, the level to which each file belongs
-% output method 2:
 %           f: 	structure with fields name (name of the file), and each of
-%               the factor names with the corresponding level to which the file belongs.
+%               the token names with the corresponding level to which the file belongs.
+%           u1,u2...: unique values for each token
 
 % v 1 Max: Basic functionality
 % v 1.1 Max: added list input method 01/06/2015
 % v 1.2 Max: added eval functionality 03/03/2016
+% v 1.3 Max: add output unique levels 09/10/2017
 
 if numel(varargin) == 1 && isstruct(varargin{1})
     varargin = struct2vararg(varargin{1});
@@ -53,7 +50,7 @@ g = finputcheck( varargin, ...
     {
     'exclude'   { 'string';'cell' }    []   ''
     'dir' { 'string'}    []   cd
-    'isdir' {'integer'} [NaN 0 1] NaN
+    'isdir' {'integer'} [0 1] 0
     'list' {'cell'} {''} {}
     'rename' {'string'} [] ''
     'eval' '' [] ''
@@ -74,7 +71,7 @@ if isempty(g.list)
     [dum,dum,all] = dirr(rootdir,'name');
     if isempty(all)
         disp('No files found')
-        varargout{1} = [];
+        f = [];
         return
     end
 else
@@ -83,7 +80,7 @@ end
 filenames = all(regexpcell(all,re,g.cmds));
 if isempty(filenames)
 %     disp('All files filtered out');
-    varargout{1} = [];
+    f = [];
     return
 end
 if not(isempty(g.exclude))
@@ -167,13 +164,10 @@ if not(isempty(g.eval))
         end
     end
 end
-if nargout > 1
-    varargout{1} = filenames;
-    varargout{2} = factnames;
-    varargout{3} = factidx;
-    varargout{4} = factlevelnames;
-elseif nargout == 1
-    varargout{1} = f;
+if nargout > 0
+    for iarg = 1:numel(factnames)
+        varargout{iarg} = factlevelnames{iarg};
+    end
 else
     for i = 1:numel(f)
         if isdir(f(i).name) && ~g.isdir
