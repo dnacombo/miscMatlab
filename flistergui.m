@@ -95,7 +95,7 @@ handles = guidata(hObject);
 set(handles.re,'string',strtrim(get(handles.re,'string')))
 f = flister(get(handles.re,'string'),'dir',handles.wd);
 if not(isempty(f))
-    set(handles.list,'string',{f.name})
+    set(handles.list,'string',regexprep({f.name},handles.wd,''))
 else
     set(handles.list,'string',{})
 end
