@@ -28,6 +28,9 @@ if isstr(backup)
     backup = str2num(backup);
 end
 
+if ischar(recurse)
+    recurse = str2num(recurse);
+end
 if recurse
     fs = rdir(fullfile(where,'**', filesep,'*'));
 else

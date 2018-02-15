@@ -37,9 +37,11 @@ function [nb,channame,strnames] = chnb(channame, varargin)
 narginchk(1,2);
 persistent labels
 if nargin == 2
-    if ischar(channame) && strcmp(channame,'labels')
+    if ischar(channame)
         labels = varargin{1};
-        return
+        if strcmp(channame,'labels')
+            return
+        end
     elseif isstruct(varargin{1}) && isfield(varargin{1},'setname')
         % assume it's an EEG dataset
         labels = {varargin{1}(1).chanlocs.labels};

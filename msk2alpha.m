@@ -4,7 +4,7 @@ function alpha = msk2alpha(msk,m,M)
 if not(islogical(msk)) || isequal(unique(msk),[0,1])
     error('Cannot deal with non binary msk')
 end
-alpha = msk;
+alpha = double(msk);
 alpha(alpha==0) = m;
 alpha(alpha==1) = M;
 % alpha = (msk + m) * (1+m-M);

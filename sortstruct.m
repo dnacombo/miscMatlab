@@ -10,7 +10,11 @@ function S = sortstruct(S, by, direction,sorter)
 
 if isscalar(S)
     return
+elseif ~isvector(S)
+    error('input structure must be a vector')
 end
+s = size(S);
+S = S(:);
 if nargin < 2
     by = fieldnames(S);
     warning('sortstruct:sortallfields','no sorting fields provided. sorting by all of them...')
@@ -36,7 +40,7 @@ if ischar(S(1).(by{1}))
         if numel(by) > 1
             tmpS = sortstruct(tmpS,by(2:end),direction,sorter(2:end));% sort under
         end
-        nS = [nS tmpS];
+        nS = [nS; tmpS];
     end
 elseif isnumeric(S(1).(by{1}))
     L = [S.(by{1})];% list all values
@@ -48,10 +52,11 @@ elseif isnumeric(S(1).(by{1}))
         if numel(by) > 1
             tmpS = sortstruct(tmpS,by(2:end),direction,sorter(2:end));% sort under
         end
-        nS = [nS tmpS];
+        nS = [nS; tmpS];
     end
 else
     error todo
 end
 S = nS;
+S = reshape(S,s);
 
