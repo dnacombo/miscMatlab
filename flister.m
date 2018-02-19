@@ -94,12 +94,6 @@ if not(isnan(g.isdir))
         filenames = filenames(~aredir);
     end
 end
-% name unnamed tokens with capital letters
-i = 65;
-while ~isempty(regexp(re,'\(([^?].*)\)', 'once'))
-    re = regexprep(re,'\(([^?].*)\)',['(?<' char(i) '>$1)'],'once');
-    i = i+1;
-end
 
 % match re to filenames and extract tokens
 names = regexp(filenames,re,'names');
