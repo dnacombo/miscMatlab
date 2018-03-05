@@ -95,11 +95,19 @@ if iscell(channame) || ischar(channame)
         channame{1} = channame{1};
         cmd = 'exact';
     end
+    shortcuts = {'meg','megmag','meggrad'};
+    tmp = channame(~ismember(channame,shortcuts));
+    for i = 1:numel(channame)
+        if any(ismember(shortcuts,lower(channame{i})))
+            tmp = union(tmp,ft_channelselection(channame{i},labels));
+        end
+    end
+    channame = tmp;
     nb = regexpcell(labels,channame,[cmd 'ignorecase']);
     
 elseif isnumeric(channame)
     nb = channame;
-    if nb > numel(labels)
+    if any(nb > numel(labels))
         nb = [];
     end
 end
