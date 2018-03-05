@@ -35,7 +35,7 @@ todel = [];
 inv = 0;
 for iv= 1:2:numel(varargin)
     if strcmp(varargin{iv},'fun')
-        fun = varargin{iv+1};
+        fun{(iv+1)/2} = varargin{iv+1};
         todel(end+1:end+2) = [iv iv+1];
     elseif strcmp(varargin{iv},'inv')
         inv = 1;
@@ -44,18 +44,23 @@ for iv= 1:2:numel(varargin)
 end
 varargin(todel) = [];
 if not(exist('fun','var'))
-    fun = [];
+    fun{1:numel(varargin)/2} = [];
 end
 
 % scan fields
 sel = true(size(list));
 for iv = 1:2:numel(varargin)
     % depending on the type of data in each field
-    if isempty(fun)
+    if isempty(fun{(iv+1)/2})
         if isnumeric(list(1).(varargin{iv}))
             fun = @eq;
         elseif ischar(list(1).(varargin{iv}))
-            fun = @strcmp;
+            if varargin{iv+1}(1) == '~'
+                varargin{iv+1}(1) = [];
+                fun = @(x,y)isempty(regexp(x,y, 'once'));
+            else
+                fun = @(x,y)~isempty(regexp(x,y, 'once'));
+            end
         end
     end
     for i = 1:numel(list)
