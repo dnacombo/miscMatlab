@@ -8,7 +8,7 @@ function S = sortstruct(S, by, direction,sorter)
 %
 % if by is empty, no sorting occurs.
 
-if isscalar(S)
+if isscalar(S) || isempty(S)
     return
 elseif ~isvector(S)
     error('input structure must be a vector')
