@@ -55,7 +55,16 @@ iempty = cellfun(@isempty,{outf.name});
 % list all their expected field values
 [a,b,c,d,e,f,g,h] = ind2sub(size(outf),find(iempty));
 wempty = [a;b;c;d;e;f;g;h];
-wempty(all(wempty==1,2),:) = [];
+if not(isempty(wempty))
+    i = 8;
+    while all(wempty(i,:) == 1)
+        wempty(i,:) = [];
+        i = i-1;
+        if i == 0
+            break
+        end
+    end
+end
 whichempty = cell(size(wempty));
 for i = 1:size(wempty,2)
     for j = 1:size(wempty,1)
