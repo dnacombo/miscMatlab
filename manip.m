@@ -48,7 +48,7 @@
 
 function varargout = manip(cmd, varargin)
 
-persistent manip_sessid
+persistent activeProject
 
 
 if verLessThan('matlab','7.12')
@@ -73,22 +73,14 @@ if ~exist(fpath, 'file')    % first time run
     projectsList(1).HomeDir = userpath;
     projectsList(1).HomeDir(end) = [];
     manip_sessid = round(rand*1e15);
-    activeProject = [manip_sessid   1];
-    save(fpath, 'projectsList', 'activeProject');
+    activeProject = 1;
+    save(fpath, 'projectsList');
 else
     load(fpath)
 end
-
-% keep number of active projects to a reasonable size
-activeProject(1:size(activeProject,1)-10,:) = [];
-
-if isempty(manip_sessid)
-    manip_sessid = round(rand*1e15);
-    activeProject(end+1,:) = [manip_sessid   activeProject(end,2)];
-    save(fpath, 'projectsList', 'activeProject');
+if isempty(activeProject)
+    activeProject = 0;
 end
-
-iid = find(activeProject(:,1) == manip_sessid);
 
 if nargin==0
     cmd = 'list';
@@ -98,24 +90,26 @@ switch lower(cmd)
     case 'cd'
         if not(isempty(varargin)) && ~strcmpi(manip('active'),varargin{1})
             manip('load',varargin{1})
-            iid = find(activeProject(:,1) == manip_sessid);
         end
-        cd(projectsList(activeProject(iid,2)).HomeDir);
+        cd(projectsList(activeProject).HomeDir);
     case 'close'
+        if nargin < 2 || ~strcmp(varargin{1},'nosave')
+            manip('save')
+        end
         openDocuments = matlab.desktop.editor.getAll;
         openDocuments.close;
         
-        load(fpath)
-        iid = find(activeProject(:,1) == manip_sessid);
-        activeProject(iid,2) = 1;
-        save(fpath, 'projectsList', 'activeProject');
+        activeProject = 0;
         varargout = {true};
         
     %=========================================    
     case 'list'
+%         openDocuments = matlab.desktop.editor.getAll;
+%         alldocs = {projectsList.OpenedFiles};
+%         comp = ismember(openDocuments,
         disp('List of available manips:')
         for ii = 1:length(projectsList)
-            if ii == activeProject(iid,2)
+            if ii == activeProject
                 str = '-> ';
             else
                 str = '   ';
@@ -127,7 +121,7 @@ switch lower(cmd)
     %=========================================    
     case {'show', 'info'}
         if nargin==1
-            ind = activeProject(iid,2);
+            ind = activeProject;
         else
             prjname = varargin{1};
             ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
@@ -135,20 +129,35 @@ switch lower(cmd)
                 error('Projects: unknown project name')
             end
         end
-        projectsList(ind)
-        varargout{1} = projectsList(activeProject(iid,2));
+        if ~ind
+            varargout = {[]};
+        else
+            projectsList(ind)
+            varargout{1} = projectsList(ind);
+        end
         
     %=========================================    
     case 'active'
-        varargout{1} = projectsList(activeProject(iid,2)).ProjectName;
+        if ~activeProject
+            if nargout == 1
+                varargout = {''};
+            end
+            return
+        end
+        varargout{1} = projectsList(activeProject).ProjectName;
         if nargout == 0
             disp(['Active project is "' varargout{1} '"'])
         end
     %=========================================    
     case 'save'
         if nargin==1
-            ind = activeProject(iid,2);
-            prjname = projectsList(ind).ProjectName;
+            ind = activeProject;
+            if ~ind
+                disp('No active project. Nothing to save.')
+                return
+            else
+                prjname = projectsList(ind).ProjectName;
+            end
         else
             prjname = varargin{1};
             ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
@@ -165,49 +174,53 @@ switch lower(cmd)
         if isempty(projectsList(ind).HomeDir)
             projectsList(ind).HomeDir = pwd;
         end
-        activeProject(iid,2) = ind;
+        activeProject = ind;
         
-        save(fpath, 'projectsList', 'activeProject');
+        save(fpath, 'projectsList');
         disp(['Manip "' prjname '" was saved'])
         
     %=========================================    
     case {'sethomedir'}
         if nargin==1
-            ind = activeProject(iid,2);
-            prjname = projectsList(ind).ProjectName;
+            ind = activeProject;
+            if ~ind
+                disp('No active project. Nothing do.')
+                return
+            else
+                prjname = projectsList(ind).ProjectName;
+            end
         else
             prjname = varargin{1};
             ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
             if isempty(ind)
-                ind = length(projectsList) + 1;
+                error(['unknown project ' prjname])
             end
         end
         projectsList(ind).HomeDir = pwd;
         
-        save(fpath, 'projectsList', 'activeProject');
+        save(fpath, 'projectsList');
         disp(['HomeDir set for "' prjname '"'])
     case {'open', 'load'}
         if nargin==1
-            prjname = 'default';
+            error('no project to open')
         else
             prjname = varargin{1};
+            if ~isnan(str2double(prjname))
+                prjname = projectsList(str2double(prjname)).ProjectName;
+            end
         end
         ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
         if isempty(ind)
-            error('Projects: unknown project name')
+            error(['unknown project ' prjname])
         end
-                
-        if manip('close')
-            load(fpath)
-            iid = find(activeProject(:,1) == manip_sessid);
-        else
-            return
-        end
+        manip close
+        load(fpath)
         
+                
         try
             cd(projectsList(ind).HomeDir);
         catch
-            warning(['Directory "' projectsList(ind).HomeDir '" does not exist'])
+            warning(['Directory "' projectsList(ind).HomeDir '" does not exist.'])
         end
         
         filenames = projectsList(ind).OpenedFiles;
@@ -222,67 +235,64 @@ switch lower(cmd)
         od = matlab.desktop.editor.getAll;
         projectsList(ind).OpenedFiles = {od.Filename};
         
-        activeProject(iid,2) = ind;
-        save(fpath, 'projectsList', 'activeProject');
+        activeProject = ind;
+        save(fpath, 'projectsList');
         disp(['Manip "' prjname '" was restored'])
-
-%     %=========================================    
-%     case 'saveload'
-%         manip('save');
-%         manip('load',varargin{:});
-        
+        commandwindow
     %=========================================    
-    case 'rename'
+    case 'rename' 
         if nargin==1
             error('Projects: project name was not specified')
         elseif nargin==2
-            prjold = projectsList(activeProject(iid,2)).ProjectName;
-            prjnew = varargin{1};
+            ind = activeProject;
+            if ~ind
+                error('No active project to rename')
+            else
+                prjold = projectsList(ind).ProjectName;
+                prjnew = varargin{1};
+                if strcmp(prjnew,'default')
+                    error('cannot rename project to "default"')
+                end
+            end
         elseif nargin==3
             prjold = varargin{1};
             prjnew = varargin{2};
         end
         ind = find(strcmpi(prjold, {projectsList.ProjectName}), 1);
         if isempty(ind)
-            error('Projects: unknown project name')
+            error(['unknown project name ' prjold])
         end
         
         projectsList(ind).ProjectName = prjnew;
         
-        save(fpath, 'projectsList', 'activeProject');
+        save(fpath, 'projectsList');
         disp(['Manip "' prjold '" was renamed to "' prjnew '"'])
         
         
     %=========================================    
     case 'delete'
         if nargin==1
-            ind = activeProject(iid,2);
-            new_prj = 'default';
+            ind = activeProject;
+            if ~ind
+                error('could not delete "default" project')
+            end
         else
             prjname = varargin{1};
             ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
             if isempty(ind)
                 error('Projects: required project was not found')
             end
-            if ind == activeProject(iid,2)
-                new_prj = 'default';
-            else
-                new_prj = projectsList(activeProject(iid,2)).ProjectName;
-            end
-        end
-        if ind==1
-            error('Projects: could not delete "default" project')
         end
         
         prjname = projectsList(ind).ProjectName;
         projectsList(ind) = [];
-        activeProject(iid,2) = find(strcmpi(new_prj, {projectsList.ProjectName}), 1);
-        
-        save(fpath, 'projectsList', 'activeProject');
-        disp(['Manip "' prjname '" was deleted'])
-        if activeProject(iid,2)==1
-            disp('Current project was changed to "default"')
+        activeProject = find(strcmpi(new_prj, {projectsList.ProjectName}), 1);
+        if isempty(activeProject)
+            activeProject = 0;
         end
+        
+        save(fpath, 'projectsList');
+        disp(['Manip "' prjname '" was deleted'])
 
     %=========================================    
     otherwise 
