@@ -1,6 +1,6 @@
-function [outf, whichempty] = flist_consolidate(f)
+function [outf, whichempty] = flist_consolidate(f,fs)
 
-% [outf, whichempty] = flist_consolidate(f)
+% [outf, whichempty] = flist_consolidate(f[,fields])
 % 
 % consolidate the output of flister.
 % f is a vector structure with several fields. Typically used to list files
@@ -9,7 +9,12 @@ function [outf, whichempty] = flist_consolidate(f)
 % This function creates a variable outf with as many dimensions as there
 % are fields (ignoring fields ending in idx) and populates the dimensions
 % with individual elements of f.
+% 
+% if provided, fields indicates field names to consolidate on (not ending
+% with idx).
+%
 % missing elements are listed in whichempty.
+% 
 
 % list all fields
 fields = fieldnames(f);
@@ -58,6 +63,14 @@ for i = 1:size(wempty,2)
     end
 end
 
-
+if exist('fs','var')
+    fs = cellfun(@(x) [x 'idx'],fs,'uniformoutput',0);
+    dperm = find(ismember(idxfields,fs));
+    order = 1:numel(idxfields);
+    order(order == dperm) = [];
+    order = [dperm, order];
+    outf = permute(outf,order);
+    outf = reshape(outf,size(outf,1),[]);
+end
 
 
