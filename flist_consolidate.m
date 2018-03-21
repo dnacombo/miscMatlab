@@ -74,12 +74,18 @@ end
 
 if exist('fs','var')
     fs = cellfun(@(x) [x 'idx'],fs,'uniformoutput',0);
-    dperm = find(ismember(idxfields,fs));
+    dperm = find(ismember(idxfields',fs));
     order = 1:numel(idxfields);
-    order(order == dperm) = [];
+    order(ismember(order,dperm)) = [];
     order = [dperm, order];
     outf = permute(outf,order);
-    outf = reshape(outf,size(outf,1),[]);
+    s = size(outf);s = mat2cells(s(1:numel(dperm)));
+    s = {s{:} []};
+    outf = reshape(outf,s{:});
 end
 
-
+function c = mat2cells(m)
+c = cell(size(m));
+for i = 1:numel(c)
+    c{i} = m(i);
+end
