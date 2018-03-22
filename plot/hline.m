@@ -34,7 +34,12 @@ if any(c)
     cs = varargin{find(c)+1};
     varargin([find(c),find(c)+1]) = [];
 end
-h = plot(repmat(xlim,numel(y),1)',[y y]',varargin{:});
+if rem(numel(varargin),2)
+    linespec = varargin{1};varargin = varargin(2:end);
+    h = plot(repmat(xlim,numel(y),1)',[y y]',linespec,'tag','hline',varargin{:});
+else
+    h = plot(repmat(xlim,numel(y),1)',[y y]','tag','hline',varargin{:});
+end
 if any(c)
     if numel(h) == size(cs,1)
         for ih = 1:numel(h)
