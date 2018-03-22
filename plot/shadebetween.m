@@ -45,8 +45,8 @@ nans = isnan(filled) | isnan(xpoints);
 filled(nans) = [];
 xpoints(nans) = [];
 
-fillhandle=fill(xpoints,filled,color);%plot the data
-set(fillhandle,'EdgeColor',edge,'FaceAlpha',transparency,'EdgeAlpha',transparency);%set edge color
+fillhandle=fill(xpoints,filled,color,...
+    'EdgeColor',edge,'FaceAlpha',transparency,'EdgeAlpha',transparency);
 
 if nargout == 0
     clear fillhandle
