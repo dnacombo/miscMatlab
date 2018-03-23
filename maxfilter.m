@@ -80,36 +80,40 @@ if not(strcmp(pass,'not recommended'))
     warning('You typed your password somewhere in a script or in this function... This is not recommended and a potential security threat...')
 end
 force = cfg.force;
-if force || str2num(force)
+if force || ischar(force) && str2num(force)
     try delete(cfg.o); end        
 end
 cfg = rmfield(cfg,{'maxfilterbin','host_with_maxfilter','ssh_tbx','ssh_pubkey','user','pass','force'});
 
-str = maxfilterbin;
+str = {['if [ ! -f ' cfg.f ' ]; then']
+    ['echo "File ' cfg.f ' not found!"']
+    'exit 1;'
+    'fi'};
+str{end+1} = maxfilterbin;
 fs = fieldnames(cfg);
 for i = 1:numel(fs)
     if any(ismember(fs{i},{'version','help','v','force', 'def','maint','headpos','hpicons','history'}))
         % first write all options with no parameters
-        str = [str ' -' fs{i}];
+        str{end} = [str{end} ' -' fs{i}];
     elseif isempty(cfg.(fs{i}))
         % skip those that should have a paramter but are empty in the
         % structure
         continue
     elseif ischar(cfg.(fs{i}))
         % write those that are char
-        str = [str ' -' fs{i} ' ' cfg.(fs{i})];
+        str{end} = [str{end} ' -' fs{i} ' ' cfg.(fs{i})];
     elseif iscellstr(cfg.(fs{i}))
         % write cellstrs separated by space
-        str = [str ' -' fs{i} ' ' strjoin(cfg.(fs{i}), ' ')];
+        str{end} = [str{end} ' -' fs{i} ' ' strjoin(cfg.(fs{i}), ' ')];
     elseif isnumeric(cfg.(fs{i}))
         % write numeric converted to string.
-        str = [str ' -' fs{i} ' ' num2str(cfg.(fs{i}))];
+        str{end} = [str{end} ' -' fs{i} ' ' num2str(cfg.(fs{i}))];
     end
 end
 
 % write script
 fid = fopen(fullfile(datadir,'maxfilter_script'),'wt');
-fprintf(fid,'%s\n',str);
+fprintf(fid,'%s\n',str{:});
 fclose(fid);
 
 if any(strcmp(host_with_maxfilter,{'localhost' 'local' '127.0.0.1'}))
