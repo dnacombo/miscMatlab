@@ -39,7 +39,7 @@ for i_f = 1:numel(fields)
 end
 
 % create output with correct shape
-outf = repmat(ef,cellfun(@numel,uf));
+outf = repmat(ef,[cellfun(@numel,uf),1]);
 % fill with the right values
 for i = 1:numel(f)
     str = 'outf(';
