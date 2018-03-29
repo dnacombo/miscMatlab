@@ -88,7 +88,7 @@ if iscell(channame) || ischar(channame)
             return
         end
     end
-    if numel(channame) == 1 && not(isempty(strmatch('inv',channame{1})))
+    if not(isempty(strmatch('inv',channame{1})))
         cmd = 'exactinv';
         channame{1} = strrep(channame{1},'inv','');
     else
