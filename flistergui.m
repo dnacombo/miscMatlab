@@ -15,13 +15,48 @@ handles.cd = uicontrol('style','pushbutton','units','normalized','position',[.82
 set(handles.re,'Callback',@updatelist)
 set(handles.cd,'Callback',@docd)
 
-hctxt = uicontextmenu;
-uimenu(hctxt,'Label','Delete files...','Callback',@delfs);
-uimenu(hctxt,'Label','Get corresponding re','Callback',@getRE);
-set(handles.list,'uicontextmenu',hctxt);
+hctxt_list = uicontextmenu;
+uimenu(hctxt_list,'Label','Delete files...','Callback',@delfs);
+uimenu(hctxt_list,'Label','Get corresponding re','Callback',@getRE);
+set(handles.list,'uicontextmenu',hctxt_list);
+
+hctxt_re = uicontextmenu;
+uimenu(hctxt_re,'Label','add token...','Callback',@addtok);
+set(handles.re,'uicontextmenu',hctxt_re);
 
 guidata(gcf,handles)
 %updatelist(handles.figure);
+
+
+function addtok(hObject,eventdata)
+
+handles = guidata(hObject);
+allfs = get(handles.list,'UserData');
+sel = allfs(get(handles.list,'Value'));
+ore = get(handles.re,'String');
+ex = {'e.g. Condition','e.g. AttendLeft','e.g. AttendRight','',''};
+reps = inputdlg({'Label','Alternatives...','','',''},'Token specifications',1,ex);
+if isempty(reps)
+    return
+else
+    for i = 1:numel(reps)
+        reps{i} = strrep(reps{i},ex{i},'');
+    end
+end
+ore = [ore '(?<' reps{1} '>'];
+for ireps = 2:numel(reps)
+    if isempty(reps{ireps})
+        break
+    end
+    ore = [ore reps{ireps} '|'];
+end
+ore(end) = ')';
+set(handles.re,'String',ore);
+drawnow
+guidata(hObject,handles)
+updatelist(handles.list)        
+    
+
 
 function getRE(hObject,eventdata)
 
@@ -110,7 +145,7 @@ fprintf('\n')
 disp(['We are selecting ' num2str(numel(f)) ' files with regular expression'])
 disp(get(handles.re,'string'))
 fprintf('\n')
-disp(f)
+disp(flist_consolidate(f))
 
 
 
