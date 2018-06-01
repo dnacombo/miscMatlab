@@ -8,7 +8,14 @@ function h = vline(x,varargin)
 %                           default = 1/40: ticklength = diff(ylim)/40 
 %   'color', [numeric] : color of the lines. may have as many rows as there are lines.
 % all other varargin arguments are passed to plot...
+%
+% vline off removes all vlines from the current plot
+%
 
+if ischar(x) && strcmpi(x,'off')
+    delete(findobj(gcf,'tag','vline'))
+    return
+end
 x = x(:);
 varg = cellfun(@(x)num2str(x),varargin,'uniformoutput',0);
 ticks = cellfun(@(x)strcmp(x,'ticks'),varg);

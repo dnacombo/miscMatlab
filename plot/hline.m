@@ -8,7 +8,14 @@ function h = hline(y,varargin)
 %                           default = 1/40: ticklength = diff(ylim)/40 
 %   'color', [numeric] : color of the lines. may have as many rows as there are lines.
 % all other varargin arguments are passed to plot...
+%
+% hline off removes all hlines from the current plot
+%
 
+if ischar(y) && strcmpi(y,'off')
+    delete(findobj(gcf,'tag','hline'))
+    return
+end
 y = y(:);
 varg = cellfun(@(x)num2str(x),varargin,'uniformoutput',0);
 ticks = cellfun(@(x)strcmp(x,'ticks'),varg);
