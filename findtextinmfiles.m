@@ -44,6 +44,9 @@ if not(isempty(filematch))
 end
 output = [];
 for i_f = 1:numel(fs)
+    if isdir(fs(i_f).name)
+        continue
+    end
     txt = readtext(fs(i_f).name,'\n',[],[],'textual');
     line = regexpcell(txt,text,fastif(ignorecase,'ignorecase',''));
     if not(isempty(line))
