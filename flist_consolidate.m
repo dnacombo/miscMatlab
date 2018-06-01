@@ -24,12 +24,16 @@ ofields = cellfun(@(x) x(1:end-3),idxfields,'uniformoutput',0);
 % find all unique values for each of these fields
 for i_f = 1:numel(idxfields)
     uf{i_f} = unique([f.(idxfields{i_f})]);
+    for i = 1:numel(uf{i_f})
+        % this is to keep correct shape of the output structure
+        nuf{i_f}(uf{i_f}(i)) = i;
+    end
     of{i_f} = unique({f.(ofields{i_f})});
 end
 % create an empty template output structure
 ef = f(1);
 for i_f = 1:numel(fields)
-    if isnumeric(ef.(fields{i_f}))
+    if isnumeric(ef.(fields{i_f})) || isstruct(ef.(fields{i_f}))
         ef.(fields{i_f}) = [];
     elseif iscell(ef.(fields{i_f}))
         ef.(fields{i_f}) = {};
@@ -44,7 +48,7 @@ outf = repmat(ef,[cellfun(@numel,uf),1]);
 for i = 1:numel(f)
     str = 'outf(';
     for i_f = 1:numel(idxfields)
-        str = [str 'f(i).(''' idxfields{i_f} '''),'];
+        str = [str 'nuf{' num2str(i_f) '}(f(i).(''' idxfields{i_f} ''')),'];
     end
     str(end) = ')';
     str = [str ' = f(i);'];
