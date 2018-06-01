@@ -118,38 +118,30 @@ fclose(fid);
 
 if any(strcmp(host_with_maxfilter,{'localhost' 'local' '127.0.0.1'}))
     disp(['========== Maxfilter runs locally =========='])
-    [status,cmdout] = system(['cd ' datadir ';chmod +x maxfilter_script;./maxfilter_script']);
-    if status
-        disp('========= Error while running Maxfilter locally ===========')
-        disp(cmdout)
-        error('Maxfilter')
-    end
+    str = ['cd ' datadir ';chmod +x maxfilter_script;./maxfilter_script'];
 else
     % run it
-    addpath(ssh_tbx)
     disp(['========== Maxfilter on remote host ' host_with_maxfilter ' =========='])
-    disp(['Processing ' cfg.f])
-    if not(isempty(ssh_pubkey))
-        ssh2_conn = ssh2_config_publickey(host_with_maxfilter,user,ssh_pubkey,'');
-    else
-        ssh2_conn = ssh2_config(host_with_maxfilter,user,pass);
-    end
-    %%
-    [ssh2_conn,command_output] = ssh2_command(ssh2_conn, ['cd ' datadir ';chmod +x maxfilter_script;./maxfilter_script'],1);
-    cfg.ssh2_conn = ssh2_conn;
-    cfg.command_output = command_output;
+    sshstr = ['ssh ' user '@' host_with_maxfilter ' '];
+    str =  [sshstr '"' ['cd ' datadir ';chmod +x maxfilter_script;./maxfilter_script'] '"' ];
+end
+[status, cmdout] = system(str);
+if status
+    disp('========= Error while running Maxfilter ===========')
+    disp(cmdout)
+    error('Maxfilter')
 end
 disp(['========== Checking output file is present =========='])
-allexits = regexp(command_output,'^EXIT ([^:]*):.*?(/.*)\.$','tokens');
+allexits = regexp(cmdout,'EXIT ([^:]*):.*?(/.*)\.','tokens');
 allexits = allexits(~emptycells(allexits));
 if isempty(allexits)
     disp('======== Maxfilter: No output created ===========')
 else
     for i = 1:numel(allexits)
-        if strcmp(allexits{i}{1}{1},'OK')
+        if strcmp(allexits{i}{1},'OK')
             disp(['========== OK =========='])
         else
-            warning(['File ' allexits{i}{1}{2} ' not created']);
+            warning(['File ' allexits{i}{2} ' not created']);
         end
     end
     disp(['========== Maxfilter DONE. =========='])
