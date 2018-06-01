@@ -8,5 +8,9 @@ if nargin == 1
 end
 c = cell(size(num));
 for i = 1:numel(num)
-    c{i} = num2str(num(i),fmt);
+    if isnumeric(num)
+        c{i} = num2str(num(i),fmt);
+    elseif iscell(num)
+        c{i} = num2str(num{i},fmt);
+    end
 end
