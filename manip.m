@@ -272,27 +272,28 @@ switch lower(cmd)
     %=========================================    
     case 'delete'
         if nargin==1
-            ind = activeProject;
-            if ~ind
+            todel = activeProject;
+            if ~todel
                 error('could not delete "default" project')
             end
         else
-            prjname = varargin{1};
-            ind = find(strcmpi(prjname, {projectsList.ProjectName}), 1);
-            if isempty(ind)
+            todel = find(strcmpi(varargin{1}, {projectsList.ProjectName}), 1);
+            if isempty(todel)
                 error('Projects: required project was not found')
             end
+            active_name = projectsList(activeProject).ProjectName;
         end
         
-        prjname = projectsList(ind).ProjectName;
-        projectsList(ind) = [];
-        activeProject = find(strcmpi(new_prj, {projectsList.ProjectName}), 1);
-        if isempty(activeProject)
+        todelname = projectsList(todel).ProjectName;
+        projectsList(todel) = [];
+        if todel == activeProject
             activeProject = 0;
+        else
+            activeProject = find(strcmpi(active_name, {projectsList.ProjectName}), 1);
         end
         
         save(fpath, 'projectsList');
-        disp(['Manip "' prjname '" was deleted'])
+        disp(['Manip "' todelname '" was deleted'])
 
     %=========================================    
     otherwise 
