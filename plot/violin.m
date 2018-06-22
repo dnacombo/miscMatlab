@@ -95,7 +95,7 @@ alp=0.5;
 mc='k';
 medc='r';
 b=[]; %bandwidth
-plotlegend=1;
+plotlegend=0;
 plotmean=1;
 plotmedian=1;
 x = [];
@@ -266,6 +266,10 @@ box on
 
 if isempty(xL)==0
     set(gca,'XtickLabel',xL2)
+end
+
+if nargout == 0
+    clear h
 end
 %-------------------------------------------------------------------------
 end %of function
