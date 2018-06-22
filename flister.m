@@ -9,6 +9,7 @@ function [f,varargout] = flister(re,varargin)
 % (see regular expressions, named tokens)
 %
 % optional input key val pairs : 
+%           'recurse', bool : recurse in subdirectories (default=no)
 %           'exclude', str  : file names matching regexp str will be
 %                            excluded from the list 
 %           'dir',str       : root directory where to search for the files 
@@ -57,6 +58,7 @@ g = finputcheck( varargin, ...
     'evalfname' '' [] 'eval'
     'sortfields' {'string';'cell'} [] 'all'
     'cmds' {'string'} [] ''
+    'recurse' {'integer'} [0 1] 1
     });
 if ischar(g)
     error(g);
@@ -68,12 +70,18 @@ rootdir = g.dir;
 % we'll first list
 % everything and then filter out.
 if isempty(g.list)
-    [dum,dum,all] = dirr(rootdir,'name');
+    if g.recurse
+        [dum,dum,all] = dirr(rootdir,'name');
+    else
+        tmp = dir(rootdir);
+        all = cellstrjoin({tmp.folder},{tmp.name},filesep);
+    end
     if isempty(all)
         disp('No files found')
         f = [];
         return
     end
+        
 else
     all = g.list;
 end
