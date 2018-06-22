@@ -4,7 +4,7 @@ function output = findtextinmfiles(text,varargin)
 % list files where text string is found
 %
 % findtextinmfiles(text)
-% find string text in all mfiles in and under the current directory.
+% find string text in all mfiles in the current directory.
 %
 % findtextinmfiles(text, ... 'key', value...)
 %       optional 'key', value pairs:
@@ -19,10 +19,11 @@ function output = findtextinmfiles(text,varargin)
 %                                             files)
 %                       'exclude', pattern: file name to exclude 
 %                       'recurse', boolean: whether to recurse through
-%                                           subdirectories or not
+%                                           subdirectories or not (defaults
+%                                           to false)
 %
 replace = [];
-setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1,'recurse',1);
+setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1,'recurse',0);
 
 if isstr(backup)
     backup = str2num(backup);
