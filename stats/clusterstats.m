@@ -1,4 +1,4 @@
-function [mask, pct,C,sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh,channeighbstructmat,use_tfce)
+function [mask, pct,C,sig] = clusterstats(input1, pperm,Stat,p, clustpthresh, finalpthresh,channeighbstructmat,use_tfce)
 
 % [mask pct C sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, finalpthresh, channeighbstructmat,use_tfce)
 %
@@ -44,9 +44,10 @@ function [mask, pct,C,sig] = clusterstats(StatPerm, pperm,Stat,p, clustpthresh, 
 if nargin == 1 % assume one structure input
     def.channeigbstruuctmat = [];
     def.use_tfce = false;
-    StatPerm = setdef(StatPerm,def);
-    struct2ws(StatPerm)
+    input1 = setdef(input1,def);
+    struct2ws(input1)
 else
+    StatPerm = input1;
     try
         narginchk(4,8)
     catch
@@ -83,9 +84,9 @@ end
 if exist('parpool','file') && ~isempty(gcp('nocreate'))
     SC = parloop(StatPerm,pperm,clustpthresh,channeighbstructmat);
 else
-    textprogressbar('Permutation ')
+%     textprogressbar('Permutation ')
     for i_perm = 1:size(StatPerm,4)
-        textprogressbar(i_perm/size(StatPerm,4)*100);
+%         textprogressbar(i_perm/size(StatPerm,4)*100);
         if use_tfce
             perm_tfce_loc = tfce(StatPerm(:,:,:,i_perm),channeighbstructmat,dh);
             SC(i_perm) = max(perm_tfce_loc(:));
@@ -110,9 +111,9 @@ else
             SC(i_perm) = max(sizeclusts);% save the sum of the largest cluster.
         end
     end
-    textprogressbar('Done')
+%     textprogressbar('Done')
 end
-textprogressbar();
+% textprogressbar();
 sortSC = sort(SC);
 clustthresh = ceil((1-finalpthresh) * numel(SC));% threshold index for sorted values
 threshT = sortSC(clustthresh);% extract threshold cluster sum
@@ -473,7 +474,7 @@ function SC = parloop(StatPerm,pperm,clustpthresh,channeighbstructmat)
 
 SC = NaN(1,size(StatPerm,4));
 % parfor_progress(size(StatPerm,4));
-disp('parallel computing of cluster size permutations');
+% disp('parallel computing of cluster size permutations');
 parfor i_perm = 1:size(StatPerm,4)
         StatPerm_loc = StatPerm(:,:,:,i_perm);
         pperm_loc = pperm(:,:,:,i_perm);
