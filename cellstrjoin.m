@@ -22,12 +22,20 @@ end
 if not(ischar(delim))
     error('Delimiter should be a string')
 end
-joined = cell(numel(C1) * numel(C2),1);
 
-i = 1;
-for i1 = 1:numel(C1)
-    for i2 = 1:numel(C2)
-        joined{i} = [C1{i1} delim C2{i2}];
-        i = i+1;
+if numel(C1) == numel(C2)
+    joined = cell(size(C1));
+    for i = 1:numel(C1)
+        joined{i} = [C1{i} delim C2{i}];
+    end
+else
+    joined = cell(numel(C1) * numel(C2),1);
+    
+    i = 1;
+    for i1 = 1:numel(C1)
+        for i2 = 1:numel(C2)
+            joined{i} = [C1{i1} delim C2{i2}];
+            i = i+1;
+        end
     end
 end
