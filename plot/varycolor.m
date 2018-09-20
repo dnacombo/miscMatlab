@@ -8,6 +8,9 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %     VARYCOLOR(numberOfColors,colorMap) returns a matrix of dimension numberOfColors by 3 using
 %     algorhythm defined by colorMap.
 %       colorMap can be:
+%                   - a string 'viridis' for the excelent viridis colormap
+%                   - a string 'auto' (default) will use brewermap if less
+%                       than 8 colors and viridis otherwise
 %                   - a string for a named color. This will vary colors from
 %                       that color to white.
 %                   - a cell array of strings of color names. This will
@@ -21,8 +24,6 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %                       between these colors. 
 %                   - a string 'rainbow' 'lines10' or any of the standard
 %                       matlab colormaps just try it. 
-%                   - a string 'auto' (default) will use lines10 if less
-%                       than 10 colors and rainbow otherwise
 %
 %     VARYCOLOR(numberOfColors,'colorbrewer',javascript) use the colormap
 %       obtained from www.colorbrewer2.org (see that website)
@@ -35,8 +36,10 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %       specifications and designs developed by Cynthia Brewer
 %       (http://colorbrewer.org/).
 %
-%     VARYCOLOR([],'gallery') creates a galery of many different possible
-%       color sets obtained by using the following inputs to varycolor
+%     VARYCOLOR('gallery') creates a gallery of many different possible
+%       color sets obtained by typing 
+%           brewermap('plot')
+%       and using the following inputs to varycolor
 %     Inputs:    numberOfColors  colorMap        varybrightness
 %                 8               'auto'              0
 %                 100             'auto'              0
@@ -82,6 +85,9 @@ narginchk(0,4)%correct number of input arguements??
 nargoutchk(0, 1)%correct number of output arguements??
 
 if not(exist('numberOfColors','var')) || isempty(numberOfColors)
+    numberOfColors = 256;
+elseif ischar(numberOfColors)
+    colorMap = numberOfColors;
     numberOfColors = 256;
 end
 if not(exist('colorMap','var')) || isempty(colorMap)
@@ -152,12 +158,10 @@ if not(isnumeric(colorMap))
     else
         toblack = 0;
     end
-    if not(isempty(colors(colorMap)))
-        c = colors(colorMap);
+    c = colors(colorMap);
+    if not(isempty(c))
         if toblack
-            c = [c; colors('black')];
-        else
-            c = [c; colors('white')];
+            c = -c;
         end
         ColorSet = varycolor(numberOfColors,[c],varybrightness,showit);
         return
@@ -165,10 +169,11 @@ if not(isnumeric(colorMap))
     
     % matlab standard colormaps and legacy code
     if strcmp(colorMap,'auto')
-        if numberOfColors <= 10
-            colorMap = 'lines10';
+        if numberOfColors <= 8
+            colorMap = 'brewermap';
+            varybrightness = 'Accent';
         else
-            colorMap = 'rainbow';
+            colorMap = 'viridis';
         end
     end
     switch colorMap
@@ -234,9 +239,6 @@ if not(isnumeric(colorMap))
             varybrightness = 0;
             m = vertcat(m{:});
             ColorSet = varycolor(numberOfColors,m);
-            if toblack
-                ColorSet = ColorSet(end:-1:1,:);
-            end
         case 'brewermap'
             ColorSet = brewermap(numberOfColors,varybrightness);
             varybrightness = 0;
@@ -287,6 +289,9 @@ if not(isnumeric(colorMap))
             catch
                 error('unknown colormap');
             end
+    end
+    if toblack
+        ColorSet = ColorSet(end:-1:1,:);
     end
 end
 if varybrightness ~= 0
@@ -609,18 +614,29 @@ function [rgb] = colors(name)
 % return the RGB triplet for a named color
 % names are taken from the 657 default colors from R (colors())
 %
-% colors(list) returns the list of all names
+% [list] = colors('list') 
+% returns the list of all names
 % 
-% colors or colors('gallery')
-%
+% colors 
 % opens an interactive window to select a color.
 %
+% [rgb] = colors
+% returns all available rgb triplets
 %
+% [name] = colors(rgb)
+% if input is numeric, attempt matching with known colors to find name;
+%
+% 
 
-% v0. Max 2016
+% v0.1 Max 2016
 
 if nargin == 0
-    name = 'gallery';
+    if nargout == 0
+        name = 'gallery';
+    else
+        rgb = colors(colors('list'));
+        return
+    end
 end
 
 cols = {
@@ -1284,6 +1300,14 @@ cols = {
     };
 cols(:,2:end) = cellfun(@(x)x/255,cols(:,2:end),'uniformoutput',0);
 
+if isnumeric(name)
+    rgb = round(name*1000)/1000;
+    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
+    icol = all(bsxfun(@eq,rgb,allcols),2);
+    rgb = cols{icol,1};
+    return
+end
+
 if strcmp(name,'list')
     rgb = cols(:,1);
     return
@@ -1293,16 +1317,23 @@ elseif strcmp(name,'gallery')
     [r,c,n] = num2rowcol(s(1));
     allcols = padarray(allcols,[n,0],NaN,'post');
     allcols = reshape(allcols,r,c,[]);
-    figure(158866);
-    set(gcf,'numbertitle','off','name','colors')
+    figure(158866);clf
+    set(gcf,'numbertitle','off','name','colors','menuBar','none')
     h = imagesc(allcols);
+    axis off
     set(h,'UserData',cols);
     h = datacursormode(gcf);
     set(h,'enable','on','updatefcn',@datatxt);
+    rgb = [];
     return
 end
 
-rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+if iscellstr(name)
+    name = name(:);
+    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
+else
+    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+end
 
 function [row, col,n] = num2rowcol(num,R)
 % 
@@ -1347,7 +1378,6 @@ else
 end
 
 disp(output_txt)
-
 
 function [map,num,typ] = brewermap(N,scheme)
 % The complete selection of ColorBrewer colorschemes (RGB colormaps).
