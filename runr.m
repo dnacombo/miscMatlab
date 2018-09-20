@@ -17,11 +17,11 @@ function output = runr(filename,varargin)
 %       name:       If there are several R chunks, they can be run by name.
 %                   the name of the R chunk to run is defined inline with 
 %                       % rchunk name
-%       trimfrom:   Exclude all lines of the output until the first
-%                   occurrence of the string in trimfrom (default '>' at
+%       trimbefore: Exclude all lines of the output until the first
+%                   occurrence of the string in trimbefore (default '>' at
 %                   the beginning of a line)
-%       trimto:     Exclude all lines of the output after the last
-%                   occurrence of the string in trimto (default '>' at the
+%       trimafter:  Exclude all lines of the output after the last
+%                   occurrence of the string in trimafter (default '>' at the
 %                   beginning of a line).
 %
 % example:          in mfile "testit.m"
@@ -46,7 +46,7 @@ function output = runr(filename,varargin)
 % % a <- read.csv('test.csv')
 % % fit <- lm(Var1 ~ Var2, data=a)
 % % summary(fit)
-% runr('testitagain.m','trimfrom','','trimto','')
+% runr('testitagain.m','trimbefore','','trimafter','')
 % 
 
 if ~exist('filename','var') || isempty(filename)
@@ -60,8 +60,8 @@ end
 def = [];
 def.name = '';
 def.num = [];
-def.trimfrom = '^>';
-def.trimto = '^>';
+def.trimbefore = '^>';
+def.trimafter = '^>';
 
 cfg = vararg2cfg(varargin,def,1);
 
@@ -103,14 +103,14 @@ fclose(fid);
 
 output = readtext('tmp.Rout','\n',[],[],'textual');
 
-if ~isempty(cfg.trimfrom)
-    starts  = find(cellfun(@(x)~isempty(x),regexp(output,cfg.trimfrom)));
+if ~isempty(cfg.trimbefore)
+    starts  = find(cellfun(@(x)~isempty(x),regexp(output,cfg.trimbefore)));
     if not(isempty(starts))
         output  = output(starts(1):end);
     end
 end
-if ~isempty(cfg.trimto)
-    stop    = find(cellfun(@(x)~isempty(x),regexp(output,cfg.trimto)));
+if ~isempty(cfg.trimafter)
+    stop    = find(cellfun(@(x)~isempty(x),regexp(output,cfg.trimafter)));
     if not(isempty(stop))
         output  = output(1:stop(end));
     end
