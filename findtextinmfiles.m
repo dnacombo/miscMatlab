@@ -23,7 +23,7 @@ function output = findtextinmfiles(text,varargin)
 %                                           to false)
 %
 replace = [];
-setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1,'recurse',0);
+setdefvarargin(varargin,'where',cd,'ignorecase',0,'replace',NaN,'filematch','.*\.m$','exclude','','backup',1,'recurse',0,'dispresults',1);
 
 if isstr(backup)
     backup = str2num(backup);
@@ -83,26 +83,28 @@ for i_f = 1:numel(fs)
 end
 
 if ~isempty(output)
-    if usejava('jvm')
-        out = [];
-        h = [];
-        for i=1:length(output)
-            [p f e] = fileparts(output(i).path);
-            fl = strrep(output(i).path,'''','''''');
-            l = output(i).line;
-            out = [out sprintf(['<a href="matlab: %s">run</a> %s%s<a href="matlab:edit(''%s'')">%s%s</a> at line '], f, p, filesep, fl, f, e)];
-            for il = 1:numel(l)
-                out = [out sprintf('<a href="matlab:opentoline(''%s'',%g,0)">%g</a> ', fl,l(il),l(il)) ];
-            end
-            out = strrep(out,'\','\\');
-            out = [out '\n'];
-            fprintf(char(out));
+    if dispresults
+        if usejava('jvm')
             out = [];
-        end% for
-        close(h)
-    else
-        disp(char(output.path));
-    end% if
+            h = [];
+            for i=1:length(output)
+                [p f e] = fileparts(output(i).path);
+                fl = strrep(output(i).path,'''','''''');
+                l = output(i).line;
+                out = [out sprintf(['<a href="matlab: %s">run</a> %s%s<a href="matlab:edit(''%s'')">%s%s</a> at line '], f, p, filesep, fl, f, e)];
+                for il = 1:numel(l)
+                    out = [out sprintf('<a href="matlab:opentoline(''%s'',%g,0)">%g</a> ', fl,l(il),l(il)) ];
+                end
+                out = strrep(out,'\','\\');
+                out = [out '\n'];
+                fprintf(char(out));
+                out = [];
+            end% for
+            close(h)
+        else
+            disp(char(output.path));
+        end% if
+    end
 else
     disp(['''' text '''' ' not found.'])
 end% if
