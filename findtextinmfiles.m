@@ -36,6 +36,8 @@ if recurse
     fs = rdir(fullfile(where,'**', filesep,'*'));
 else
     fs = dir(where);
+    [fs.name] = rep2struct(cellstrjoin({fs.folder},{fs.name},filesep));
+    fs = rmfield(fs,'folder');
 end
 if not(isempty(exclude))
     fs = fs(regexpcell({fs.name},exclude,'inv'));
