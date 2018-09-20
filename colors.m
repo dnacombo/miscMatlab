@@ -4,7 +4,8 @@ function [rgb] = colors(name)
 % 
 % return the RGB triplet for a named color
 % names are taken from the 657 default colors from R (colors())
-%
+% alternatively name can be a HEX color specification, starting with # (e.g. '#204A5F')
+% 
 % [list] = colors('list') 
 % returns the list of all names
 % 
@@ -29,6 +30,49 @@ if nargin == 0
         return
     end
 end
+
+cols = collist;
+
+if isnumeric(name)
+    rgb = round(name*1000)/1000;
+    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
+    icol = all(bsxfun(@eq,rgb,allcols),2);
+    rgb = cols{icol,1};
+    return
+end
+
+if strcmp(name,'list')
+    rgb = cols(:,1);
+    return
+elseif strcmp(name,'gallery')
+    allcols = cell2mat(cols(:,2:end));
+    s = size(allcols);
+    [r,c,n] = num2rowcol(s(1));
+    allcols = padarray(allcols,[n,0],NaN,'post');
+    allcols = reshape(allcols,r,c,[]);
+    figure(158866);clf
+    set(gcf,'numbertitle','off','name','colors','menuBar','none')
+    h = imagesc(allcols);
+    axis off
+    set(h,'UserData',cols);
+    h = datacursormode(gcf);
+    set(h,'enable','on','updatefcn',@datatxt);
+    return
+end
+
+if iscellstr(name)
+    name = name(:);
+    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
+elseif strfind(name,'#') == 1
+    rgb(1) = hex2dec(name(2:3));
+    rgb(2) = hex2dec(name(4:5));
+    rgb(3) = hex2dec(name(6:7));
+    rgb = rgb/255;
+else
+    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+end
+
+function cols = collist
 
 cols = {
     'white'	255	255	255
@@ -691,39 +735,6 @@ cols = {
     };
 cols(:,2:end) = cellfun(@(x)x/255,cols(:,2:end),'uniformoutput',0);
 
-if isnumeric(name)
-    rgb = round(name*1000)/1000;
-    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
-    icol = all(bsxfun(@eq,rgb,allcols),2);
-    rgb = cols{icol,1};
-    return
-end
-
-if strcmp(name,'list')
-    rgb = cols(:,1);
-    return
-elseif strcmp(name,'gallery')
-    allcols = cell2mat(cols(:,2:end));
-    s = size(allcols);
-    [r,c,n] = num2rowcol(s(1));
-    allcols = padarray(allcols,[n,0],NaN,'post');
-    allcols = reshape(allcols,r,c,[]);
-    figure(158866);clf
-    set(gcf,'numbertitle','off','name','colors','menuBar','none')
-    h = imagesc(allcols);
-    axis off
-    set(h,'UserData',cols);
-    h = datacursormode(gcf);
-    set(h,'enable','on','updatefcn',@datatxt);
-    return
-end
-
-if iscellstr(name)
-    name = name(:);
-    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
-else
-    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
-end
 
 function [row, col,n] = num2rowcol(num,R)
 % 
