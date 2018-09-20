@@ -33,9 +33,10 @@ function [list, sel] = flist_select(list,varargin)
 % parse arguments
 todel = [];
 inv = 0;
+fun = {};
 for iv= 1:2:numel(varargin)
     if strcmp(varargin{iv},'fun')
-        fun{(iv+1)/2} = varargin{iv+1};
+        fun{end+1} = varargin{iv+1};
         todel(end+1:end+2) = [iv iv+1];
     elseif strcmp(varargin{iv},'inv')
         inv = 1;
@@ -43,7 +44,7 @@ for iv= 1:2:numel(varargin)
     end
 end
 varargin(todel) = [];
-if not(exist('fun','var'))
+if isempty(fun)
     fun{1:numel(varargin)/2} = [];
 end
 
