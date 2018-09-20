@@ -14,10 +14,11 @@
 % 
 %   MANIP('close') closes all opened files
 % 
-%   MANIP('save') saves current working directory and editor state under
-%   the active project 
-%   MANIP('save', projectName) saves current working directory and
-%   editor state under the specified project name
+%   MANIP('save'[, projectName]) saves current working directory and
+%   editor state for current project or projectName
+%   
+%   MANIP('sethomedir' [, projectName]) set home director for current
+%   project or projectName
 % 
 %   MANIP('load') restores the project "default" 
 %   MANIP('load', projectName) restores the project with specified name
