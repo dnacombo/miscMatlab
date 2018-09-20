@@ -40,7 +40,7 @@ elseif ischar(c)
         c = [c ' '];
     end
     fprintf('%s',c);
-    strCR = -1;strCRtitle = repmat('\b',1,numel(c));
+    strCR = -1;strCRtitle = repmat('\b',1,numel(c)+1);
 elseif isnumeric(c)
     % Progress bar - normal progress
     if isempty(prevc)
