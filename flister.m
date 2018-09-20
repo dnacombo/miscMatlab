@@ -9,7 +9,7 @@ function [f,varargout] = flister(re,varargin)
 % (see regular expressions, named tokens)
 %
 % optional input key val pairs : 
-%           'recurse', bool : recurse in subdirectories (default=no)
+%           'recurse', bool : recurse in subdirectories (default=true)
 %           'exclude', str  : file names matching regexp str will be
 %                            excluded from the list 
 %           'dir',str       : root directory where to search for the files 
