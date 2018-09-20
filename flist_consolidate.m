@@ -22,6 +22,7 @@ fields = fieldnames(f);
 idxfields = fields(regexpcell(fields,'.*idx$'));
 ofields = cellfun(@(x) x(1:end-3),idxfields,'uniformoutput',0);
 % find all unique values for each of these fields
+uf = {};
 for i_f = 1:numel(idxfields)
     uf{i_f} = unique([f.(idxfields{i_f})]);
     for i = 1:numel(uf{i_f})
