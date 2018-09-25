@@ -9,6 +9,8 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %     algorhythm defined by colorMap.
 %       colorMap can be:
 %                   - a string 'viridis' for the excelent viridis colormap
+%                   - a string 'ggplot' to retrieve ggplot2 colorscales
+%                     (requires R and package ggplot2 installed)
 %                   - a string 'auto' (default) will use brewermap if less
 %                       than 8 colors and viridis otherwise
 %                   - a string for a named color. This will vary colors from
@@ -24,6 +26,11 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %                       between these colors. 
 %                   - a string 'rainbow' 'lines10' or any of the standard
 %                       matlab colormaps just try it. 
+%
+%     VARYCOLOR(numberOfColors,'ggplot',scalename) retrieve colormap
+%       from ggplot2 with the R command: 
+%             cols <- scale_[scalename]()$palette(numberOfColors)
+%       where [scalename] is replaced with the scale name (default= 'colour_hue')
 %
 %     VARYCOLOR(numberOfColors,'colorbrewer',javascript) use the colormap
 %       obtained from www.colorbrewer2.org (see that website)
@@ -233,6 +240,27 @@ if not(isnumeric(colorMap))
             end
         case 'viridis'
             ColorSet = viridis(numberOfColors);
+        case 'ggplot'
+            if isnumeric(varybrightness)
+                varybrightness = 'colour_hue';
+            end
+            script = {'library(ggplot2)'
+            ['n <- ' num2str(numberOfColors)]
+            ['cols <- scale_' varybrightness '()$palette(' num2str(numberOfColors) ')']
+            'write.csv(cols,"tmp.csv")'};
+
+            fid = fopen('tmp.R','wt');
+            for i = 1:numel(script)
+                fprintf(fid,'%s\n',script{i});
+            end
+            fclose(fid);
+            !R CMD BATCH tmp.R
+            ColorSet = readtable('tmp.csv');
+            ColorSet = colors(ColorSet.x(1:end));
+            delete('tmp.csv')
+            delete('tmp.Rout')
+            delete('tmp.R')
+            
         case 'colorbrewer'
             % you should paste a cell array of exported javascript rgb values
             m = [cellfun(@eval,varybrightness,'uniformoutput',0)];
@@ -613,7 +641,8 @@ function [rgb] = colors(name)
 % 
 % return the RGB triplet for a named color
 % names are taken from the 657 default colors from R (colors())
-%
+% alternatively name can be a HEX color specification, starting with # (e.g. '#204A5F')
+% 
 % [list] = colors('list') 
 % returns the list of all names
 % 
@@ -638,6 +667,52 @@ if nargin == 0
         return
     end
 end
+
+cols = collist;
+
+if isnumeric(name)
+    rgb = round(name*1000)/1000;
+    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
+    icol = all(bsxfun(@eq,rgb,allcols),2);
+    rgb = cols{icol,1};
+    return
+end
+
+if strcmp(name,'list')
+    rgb = cols(:,1);
+    return
+elseif strcmp(name,'gallery')
+    allcols = cell2mat(cols(:,2:end));
+    s = size(allcols);
+    [r,c,n] = num2rowcol(s(1));
+    allcols = padarray(allcols,[n,0],NaN,'post');
+    allcols = reshape(allcols,r,c,[]);
+    figure(158866);clf
+    set(gcf,'numbertitle','off','name','colors','menuBar','none')
+    h = imagesc(allcols);
+    axis off
+    set(h,'UserData',cols);
+    h = datacursormode(gcf);
+    set(h,'enable','on','updatefcn',@datatxt);
+    return
+end
+
+if iscellstr(name)
+    name = name(:);
+    rgb = NaN(numel(name),3);
+    for i = 1:numel(name)
+        rgb(i,:) = colors(name{i});
+    end
+elseif strfind(name,'#') == 1
+    rgb(1) = hex2dec(name(2:3));
+    rgb(2) = hex2dec(name(4:5));
+    rgb(3) = hex2dec(name(6:7));
+    rgb = rgb/255;
+else
+    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
+end
+
+function cols = collist
 
 cols = {
     'white'	255	255	255
@@ -1300,40 +1375,6 @@ cols = {
     };
 cols(:,2:end) = cellfun(@(x)x/255,cols(:,2:end),'uniformoutput',0);
 
-if isnumeric(name)
-    rgb = round(name*1000)/1000;
-    allcols = round(cell2mat(cols(:,2:end))*1000)/1000;
-    icol = all(bsxfun(@eq,rgb,allcols),2);
-    rgb = cols{icol,1};
-    return
-end
-
-if strcmp(name,'list')
-    rgb = cols(:,1);
-    return
-elseif strcmp(name,'gallery')
-    allcols = cell2mat(cols(:,2:end));
-    s = size(allcols);
-    [r,c,n] = num2rowcol(s(1));
-    allcols = padarray(allcols,[n,0],NaN,'post');
-    allcols = reshape(allcols,r,c,[]);
-    figure(158866);clf
-    set(gcf,'numbertitle','off','name','colors','menuBar','none')
-    h = imagesc(allcols);
-    axis off
-    set(h,'UserData',cols);
-    h = datacursormode(gcf);
-    set(h,'enable','on','updatefcn',@datatxt);
-    rgb = [];
-    return
-end
-
-if iscellstr(name)
-    name = name(:);
-    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
-else
-    rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
-end
 
 function [row, col,n] = num2rowcol(num,R)
 % 
