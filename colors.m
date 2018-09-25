@@ -62,7 +62,10 @@ end
 
 if iscellstr(name)
     name = name(:);
-    rgb = cell2mat(cellfun(@(x)cell2mat(cols(strcmp(cols(:,1),x),2:end)),name,'uniformoutput',0));
+    rgb = NaN(numberOfColors,3);
+    for i = 1:numel(name)
+        rgb(i,:) = colors(name{i});
+    end
 elseif strfind(name,'#') == 1
     rgb(1) = hex2dec(name(2:3));
     rgb(2) = hex2dec(name(4:5));
