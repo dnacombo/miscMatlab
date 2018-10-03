@@ -99,7 +99,7 @@ for i = 1:numel(script)
 end
 fclose(fid);
 
-!R CMD BATCH tmp.R
+!R CMD BATCH --no-save --no-restore tmp.R
 
 output = readtext('tmp.Rout','\n',[],[],'textual');
 
