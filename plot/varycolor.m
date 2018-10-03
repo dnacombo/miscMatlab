@@ -254,7 +254,7 @@ if not(isnumeric(colorMap))
                 fprintf(fid,'%s\n',script{i});
             end
             fclose(fid);
-            !R CMD BATCH tmp.R
+            !R CMD BATCH --no-save --no-restore tmp.R
             ColorSet = readtable('tmp.csv');
             ColorSet = colors(ColorSet.x(1:end));
             delete('tmp.csv')
