@@ -1,5 +1,6 @@
 function app = eq_approx(x,y,dec)
 
+% app = eq_approx(x,y,dec)
 % whether x and y are approximately equal at dec decimals.
 
 if not(exist('dec','var'))
