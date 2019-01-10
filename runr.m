@@ -23,6 +23,7 @@ function output = runr(filename,varargin)
 %       trimafter:  Exclude all lines of the output after the last
 %                   occurrence of the string in trimafter (default '>' at the
 %                   beginning of a line).
+%       dir:        set working directory prior to running chunk
 %
 % example:          in mfile "testit.m"
 % 
@@ -62,6 +63,7 @@ def.name = '';
 def.num = [];
 def.trimbefore = '^>';
 def.trimafter = '^>';
+def.dir = cd;
 
 cfg = vararg2cfg(varargin,def,1);
 
@@ -94,6 +96,7 @@ script = txt(start:stop);
 script = cellfun(@(x) x(2:end),script,'uniformoutput',0);
 
 fid = fopen('tmp.R','wt');
+fprintf(fid,'setwd("%s")\n',cfg.dir);
 for i = 1:numel(script)
     fprintf(fid,'%s\n',script{i});
 end
