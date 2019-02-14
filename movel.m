@@ -1,7 +1,7 @@
 function out = movel(in,from,to)
 
 % out = movel(in,from,to)
-% move elements in an array
+% move elements in "in" array from "from" position to "to" position
 
 error(nargchk(3,3,nargin));
 
