@@ -97,17 +97,24 @@ if iscell(channame) || ischar(channame)
     end
     % use fieldtrip's shortcuts
     shortcuts = {'meg','megmag','meggrad'};
-    tmp = channame(~ismember(channame,shortcuts));
-    for i = 1:numel(channame)
-        if any(ismember(shortcuts,lower(channame{i})))
-            tmp = [tmp;ft_channelselection(channame{i},labels)];
+    isshortcut = ismember(channame,shortcuts);
+    if any(isshortcut)
+        tmp = {};
+        for i_short = 1:numel(isshortcut)
+            if ~isshortcut(i_short)
+                tmp{end+1} = channame{i_short};
+            else
+                tmp2 = ft_channelselection(channame{i_short},labels);
+                % remove duplicates if any (sorting alphabetically)
+                tmp2 = unique(tmp2);
+                % undo the sorting, make the order identical to that of the original labels
+                [~, indx] = match_str(labels, tmp2);
+                tmp2 = tmp2(indx);
+                tmp = [tmp; tmp2];
+            end
         end
+        channame = tmp;
     end
-    % remove duplicates if any (sorting alphabetically)
-    tmp = unique(tmp);
-    % undo the sorting, make the order identical to that of the original labels
-    [~, indx] = match_str(labels, tmp);
-    channame = tmp(indx);
     
     nb = regexpcell(labels,channame,[cmd 'ignorecase']);
     
