@@ -58,8 +58,14 @@ g = finputcheck( varargin, ...
     'evalfname' '' [] 'eval'
     'sortfields' {'string';'cell'} [] 'all'
     'cmds' {'string'} [] ''
-    'recurse' {'integer'} [0 1] 1
+    'recurse' {'integer';'string'} [] 1
     });
+if ischar(g)
+    error(g);
+end
+if ischar(g.recurse)
+    g.recurse = str2num(g.recurse);
+end
 if ischar(g)
     error(g);
 end
