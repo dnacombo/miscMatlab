@@ -28,7 +28,7 @@
 %   MANIP('rename', newName) renames the active project
 %   MANIP('rename', projectName, newName) renames the project
 %
-%   MANIP('delete') deletes the active project
+%   MANIP('delete') deletes the active project, alternatives: 'del' or 'rm'
 %   MANIP('delete', projectName) deletes the project with specified name
 % 
 %   Examples:
@@ -282,7 +282,7 @@ switch lower(cmd)
         
         
     %=========================================    
-    case 'delete'
+    case {'delete' 'del' 'rm'}
         if nargin==1
             todel = activeProject;
             if ~todel
