@@ -1940,9 +1940,9 @@ function cols = trytable(colorMap,numberOfColors)
 % try to read from a tabular file in extracolormaps folder under here
 
 try
-    d = table2array(readtable(fullfile(fileparts(mfilename),'extracolormaps',colorMap)));
+    d = table2array(readtable(fullfile(fileparts(mfilename('fullpath')),'extracolormaps',colorMap)));
 catch
-    d = table2array(readtable(fullfile(fileparts(mfilename),'extracolormaps',[colorMap '.csv'])));
+    d = table2array(readtable(fullfile(fileparts(mfilename('fullpath')),'extracolormaps',[colorMap '.csv'])));
 end
 idx = round(linspace(1,size(d,1),numberOfColors));
 cols = d(idx,:);
