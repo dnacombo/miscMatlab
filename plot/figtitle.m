@@ -1,4 +1,4 @@
-function figtitle(str,varargin)
+function hh = figtitle(str,varargin)
 
 % h = figtitle(str,varargin)
 % create a title centered to the top of the current figure
