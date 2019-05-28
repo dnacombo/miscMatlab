@@ -1,4 +1,4 @@
-function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
+function ColorSet=varycolor(numberOfColors,colorMap,option,showit)
 % VARYCOLOR Produces various color sets with maximum variation for plots.
 %
 %     VARYCOLOR(numberOfColors) returns a matrix of dimension
@@ -26,6 +26,9 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %                       between these colors. 
 %                   - a string 'rainbow' 'lines10' or any of the standard
 %                       matlab colormaps just try it. 
+%                   - a string 'MPL_Magma' 'Moreland_Extended_Black_Body'
+%                       or another name to a csv file under extracolormaps
+%                       folder.
 %
 %     VARYCOLOR(numberOfColors,'ggplot',scalename) retrieve colormap
 %       from ggplot2 with the R command: 
@@ -47,26 +50,22 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 %       color sets obtained by typing 
 %           brewermap('plot')
 %       and using the following inputs to varycolor
-%     Inputs:    numberOfColors  colorMap        varybrightness
-%                 8               'auto'              0
-%                 100             'auto'              0
-%                 8                'red'              0
-%                 10              'blue'              0
-%                 10               'jet'              0
-%                 100             'bone'              0
-%                 3               '-red'              0
-%                 7               '-blue'             0
-%                 100    [255 255 178;189 0 0]/255    0
+%     Inputs:    numberOfColors  colorMap           option
+%                 8               'auto'              []
+%                 100             'auto'              []
+%                 8                'red'              []
+%                 10              'blue'              []
+%                 10               'jet'              []
+%                 100             'bone'              []
+%                 3               '-red'              []
+%                 7               '-blue'             []
+%                 100    [255 255 178;189 0 0]/255    []
 %                 100    [255 127 0;0 127 127]/255    1
 %                 100    [255 127 0;0 127 127]/255    -1
 %                 100        'colorbrewer'            {'rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'}
 %
-%     VARYCOLOR(numberOfColors,colorMap,varybrightness) attempts to vary the brightness of
-%       the colors (from darkest to brightest of input colors if
-%       varybrightness == 1 and from brightest to darkest if varybrightness
-%       == -1) (experimental)
 %
-%     VARYCOLOR(numberOfColors,colorMap,varybrightness, showit)
+%     VARYCOLOR(numberOfColors,colorMap,option, showit)
 %               if showit is true, show the output colors in a figure.
 %
 %     Example Usage:
@@ -84,6 +83,8 @@ function ColorSet=varycolor(numberOfColors,colorMap,varybrightness,showit)
 % v2 Maximilien Chaumon 2014: added varybrightness colorbrewer & gallery
 % v3 Maximilien Chaumon 2015: added viridis colormap
 % v4 Maximilien Chaumon 2016: added named colors from R standard colors()
+% v5 Maximilien Chaumon 2019: added extracolormaps, renamed varybrightness
+%                             to option and removed varybrightness code.
 
 %
 % based on Daniel Helmick 8/12/2008
@@ -100,8 +101,8 @@ end
 if not(exist('colorMap','var')) || isempty(colorMap)
     colorMap = 'auto';
 end
-if not(exist('varybrightness','var')) || isempty(varybrightness)
-    varybrightness = 0;
+if not(exist('option','var')) || isempty(option)
+    option = 0;
 end
 if not(exist('showit','var')) || isempty(showit)
     showit = 0;
@@ -154,7 +155,7 @@ if not(isnumeric(colorMap))
         % several colors in a cell array of names
         c = cellfun(@colors,colorMap,'uniformoutput',0);
         c = vertcat(c{:});
-        ColorSet = varycolor(numberOfColors,c,varybrightness,showit);
+        ColorSet = varycolor(numberOfColors,c,option,showit);
         return
     end
     
@@ -170,7 +171,7 @@ if not(isnumeric(colorMap))
         if toblack
             c = -c;
         end
-        ColorSet = varycolor(numberOfColors,[c],varybrightness,showit);
+        ColorSet = varycolor(numberOfColors,[c],option,showit);
         return
     end
     
@@ -178,7 +179,7 @@ if not(isnumeric(colorMap))
     if strcmp(colorMap,'auto')
         if numberOfColors <= 8
             colorMap = 'brewermap';
-            varybrightness = 'Accent';
+            option = 'Accent';
         else
             colorMap = 'viridis';
         end
@@ -241,12 +242,12 @@ if not(isnumeric(colorMap))
         case 'viridis'
             ColorSet = viridis(numberOfColors);
         case 'ggplot'
-            if isnumeric(varybrightness)
-                varybrightness = 'colour_hue';
+            if isnumeric(option)
+                option = 'colour_hue';
             end
             script = {'library(ggplot2)'
             ['n <- ' num2str(numberOfColors)]
-            ['cols <- scale_' varybrightness '()$palette(' num2str(numberOfColors) ')']
+            ['cols <- scale_' option '()$palette(' num2str(numberOfColors) ')']
             'write.csv(cols,"tmp.csv")'};
 
             fid = fopen('tmp.R','wt');
@@ -263,13 +264,13 @@ if not(isnumeric(colorMap))
             
         case 'colorbrewer'
             % you should paste a cell array of exported javascript rgb values
-            m = [cellfun(@eval,varybrightness,'uniformoutput',0)];
-            varybrightness = 0;
+            m = [cellfun(@eval,option,'uniformoutput',0)];
+            option = 0;
             m = vertcat(m{:});
             ColorSet = varycolor(numberOfColors,m);
         case 'brewermap'
-            ColorSet = brewermap(numberOfColors,varybrightness);
-            varybrightness = 0;
+            ColorSet = brewermap(numberOfColors,option);
+            option = 0;
         case 'gallery'
             brewermap('plot')
             figure;
@@ -282,8 +283,8 @@ if not(isnumeric(colorMap))
                 3 '-red' 0
                 7 '-blue' 0
                 100 [255 255 178;189 0 0]/255 0
-                100 [255 127 0;0 127 127]/255 1
-                100 [255 127 0;0 127 127]/255 -1
+                100 [255 127 0;0 127 127]/255 0
+                100 'MPL_Magma' 0
                 100 'colorbrewer' {'rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'}};
             for i = 1:size(shows,1)
                 subplot(3,4,i)
@@ -293,14 +294,7 @@ if not(isnumeric(colorMap))
                 else
                     titstr = ['custom colors'];
                 end
-                if ~iscell(shows{i,3}) && shows{i,3} ~= 0
-                    if shows{i,3} > 0
-                        titstr = {titstr 'varybrightness'};
-                    else
-                        titstr = {titstr '-varybrightness'};
-                    end
-                end
-                title(titstr)
+                title(titstr,'Interpreter','none')
             end
         otherwise
             if strncmp(colorMap,'-',1)
@@ -315,16 +309,21 @@ if not(isnumeric(colorMap))
                     ColorSet = ColorSet(end:-1:1,:);
                 end
             catch
-                error('unknown colormap');
+                % last try:
+                try
+                    ColorSet = trytable(colorMap,numberOfColors);
+                catch
+                    error('unknown colormap');
+                end
             end
     end
     if toblack
         ColorSet = ColorSet(end:-1:1,:);
     end
 end
-if varybrightness ~= 0
+if option ~= 0
     ColorBright = rgb2hsv(ColorSet);
-    if varybrightness > 0
+    if option > 0
         allbright = linspace(min(ColorBright(:,3)),max(ColorBright(:,3)),size(ColorBright,1));
     else
         allbright = linspace(max(ColorBright(:,3)),min(ColorBright(:,3)),size(ColorBright,1));
@@ -694,6 +693,7 @@ elseif strcmp(name,'gallery')
     set(h,'UserData',cols);
     h = datacursormode(gcf);
     set(h,'enable','on','updatefcn',@datatxt);
+    rgb = [];
     return
 end
 
@@ -1935,3 +1935,16 @@ end
 % 5. Products derived from this software may not be called "ColorBrewer", nor
 % may "ColorBrewer" appear in their name, without prior written permission of Cynthia Brewer.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%license
+
+function cols = trytable(colorMap,numberOfColors)
+% try to read from a tabular file in extracolormaps folder under here
+
+try
+    d = table2array(readtable(fullfile(fileparts(mfilename),'extracolormaps',colorMap)));
+catch
+    d = table2array(readtable(fullfile(fileparts(mfilename),'extracolormaps',[colorMap '.csv'])));
+end
+idx = round(linspace(1,size(d,1),numberOfColors));
+cols = d(idx,:);
+
+
