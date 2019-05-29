@@ -85,4 +85,6 @@ set(hh,'units','normalize')
 set(gcf,'toolBar',hastoolbar)
 set(gcf,'menubar',hasmenubar)
 uistack(hh,'bottom');
-
+if nargout == 0
+    clear hh
+end
