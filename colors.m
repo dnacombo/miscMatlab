@@ -62,6 +62,7 @@ end
 
 if iscellstr(name)
     name = name(:);
+    numberOfColors = numel(name);
     rgb = NaN(numberOfColors,3);
     for i = 1:numel(name)
         rgb(i,:) = colors(name{i});
