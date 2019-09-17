@@ -77,11 +77,11 @@ rootdir = g.dir;
 % everything and then filter out.
 if isempty(g.list)
     if g.recurse
-        [dum,dum,all] = dirr(rootdir,'name');
+        [all] = dir(fullfile(rootdir,'**'));
     else
-        tmp = dir(rootdir);
-        all = cellstrjoin({tmp.folder},{tmp.name},filesep);
+        [all] = dir(fullfile(rootdir,'*'));
     end
+    all = cellstrjoin({all.folder},{all.name},filesep);
     if isempty(all)
         disp('No files found')
         f = [];
