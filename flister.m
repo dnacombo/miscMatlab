@@ -43,6 +43,7 @@ function [f,varargout] = flister(re,varargin)
 % v 1.1 Max: added list input method 01/06/2015
 % v 1.2 Max: added eval functionality 03/03/2016
 % v 1.3 Max: add output unique levels 09/10/2017
+% v 1.4 Max: use buitin dir instead of dirr 09/2019
 
 if numel(varargin) == 1 && isstruct(varargin{1})
     varargin = struct2vararg(varargin{1});
