@@ -15,7 +15,7 @@ function [outf, whichempty] = flist_consolidate(f,fs)
 %
 % missing elements are listed in whichempty.
 % 
-
+if isempty(f);outf = [];whichempty = [];return;end
 % list all fields
 fields = fieldnames(f);
 % find those that end with idx
