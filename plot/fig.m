@@ -26,6 +26,7 @@ if numel(varargin) > 0 && isnumeric(varargin{1}) && varargin{1} > 10 && varargin
         if not(isempty(varargin))
             set(h,varargin{:});
         end
+        figure(h);
     else
         [h] = figure(varargin{:});% call builtin figure without geometry input
     end
