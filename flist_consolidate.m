@@ -17,7 +17,11 @@ function [outf, whichempty] = flist_consolidate(f,fs)
 % 
 if isempty(f);outf = [];whichempty = [];return;end
 % list all fields
-fields = fieldnames(f);
+if exist('fs','var')
+    fields = [fs, strcat(fs,'idx')];
+else
+    fields = fieldnames(f);
+end
 % find those that end with idx
 idxfields = fields(regexpcell(fields,'.*idx$'));
 ofields = cellfun(@(x) x(1:end-3),idxfields,'uniformoutput',0);
@@ -32,7 +36,7 @@ for i_f = 1:numel(idxfields)
     of{i_f} = unique({f.(ofields{i_f})});
 end
 % create an empty template output structure
-ef = f(1);
+ef = f(1);ef = structfun(@(x) [], ef, 'UniformOutput', false);
 for i_f = 1:numel(fields)
     if isnumeric(ef.(fields{i_f})) || isstruct(ef.(fields{i_f}))
         ef.(fields{i_f}) = [];
