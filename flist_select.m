@@ -45,7 +45,7 @@ for iv= 1:2:numel(varargin)
 end
 varargin(todel) = [];
 if isempty(fun)
-    fun{1:numel(varargin)/2} = [];
+    fun(1:numel(varargin)/2) = repmat({[]},numel(varargin)/2,1);
 end
 
 % scan fields
@@ -54,18 +54,18 @@ for iv = 1:2:numel(varargin)
     % depending on the type of data in each field
     if isempty(fun{(iv+1)/2})
         if isnumeric(list(1).(varargin{iv}))
-            fun = @eq;
+            fun{(iv+1)/2} = @eq;
         elseif ischar(list(1).(varargin{iv}))
             if varargin{iv+1}(1) == '~'
                 varargin{iv+1}(1) = [];
-                fun = @(x,y)isempty(regexp(x,y, 'once'));
+                fun{(iv+1)/2} = @(x,y)isempty(regexp(x,y, 'once'));
             else
-                fun = @(x,y)~isempty(regexp(x,y, 'once'));
+                fun{(iv+1)/2} = @(x,y)~isempty(regexp(x,y, 'once'));
             end
         end
     end
     for i = 1:numel(list)
-        sel(i) = sel(i) & fun([list(i).(varargin{iv})],varargin{iv+1});
+        sel(i) = sel(i) & fun{(iv+1)/2}([list(i).(varargin{iv})],varargin{iv+1});
     end
 end
 if inv
