@@ -33,6 +33,7 @@ function [f,varargout] = flister(re,varargin)
 %           'sortfields', cellstr : fields to sort output structure on
 %                           (defaults to all tokens found in re. set to
 %                           empty to force not sorting)
+%           'noidx', boolean: whether or not idx fields should be returned
 %
 % outputs:
 %           f: 	structure with fields name (name of the file), and each of
@@ -60,6 +61,7 @@ g = finputcheck( varargin, ...
     'sortfields' {'string';'cell'} [] 'all'
     'cmds' {'string'} [] ''
     'recurse' {'integer';'string'} [] 1
+    'noidx' {'integer'} [0 1] 0
     });
 if ischar(g)
     error(g);
@@ -135,12 +137,14 @@ for i = 1:numel(factnames)
     end
     factidx{i} = regexpcell(factlevelnames{i},finder,'exact');
 end
+if not(g.noidx)
 if not(isempty(factnames))
     for i = 1:numel(filenames)
         for j = 1:numel(factnames)
             f(i).([factnames{j} 'idx']) = factidx{j}(i);
         end
     end
+end
 end
 if ~isempty(g.sortfields) && strcmp(g.sortfields{1},'all')
     g.sortfields = factnames;
