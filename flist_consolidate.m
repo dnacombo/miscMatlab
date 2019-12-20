@@ -71,14 +71,23 @@ end
 % create output with correct shape
 outf = repmat(ef,[cellfun(@numel,uf),1]);
 % fill with the right values
+w = 1;
 for i = 1:numel(f)
     str = 'outf(';
     for i_f = 1:numel(idxfields)
         str = [str 'nuf{' num2str(i_f) '}(f(i).(''' idxfields{i_f} ''')),'];
     end
     str(end) = ')';
-    str = [str ' = f(i);'];
-    eval(str);
+    totest = [str '.(fields{1})'];
+    if isempty(eval(totest))
+        str = [str ' = f(i);'];
+        eval(str);
+    else
+        if w
+            warning('Dropping values.')
+        end
+        w = 0;
+    end
 end
 % find out which ones are empty
 if isfield(outf,'name')
