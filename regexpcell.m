@@ -13,6 +13,7 @@ function idx = regexpcell(c,pat, cmds)
 % 'all' (default) returns all indices, including repeats (if several pat match a single cell in c).
 % 'unique' will return unique sorted indices.
 % 'intersect' will return only indices in c that match ALL the patterns in pat.
+% 'once' will return only the first index in each c.
 % 
 % v1 Maximilien Chaumon 01/05/09
 % v1.1 Maximilien Chaumon 24/05/09 - added ignorecase
@@ -41,6 +42,11 @@ if not(isempty(regexpi(cmds,'exact', 'once' )))
 else
     exact = false;
 end
+if not(isempty(regexpi(cmds,'once', 'once' )))
+    once = true;
+else
+    once = false;
+end
 if not(isempty(regexpi(cmds,'unique', 'once' )))
     combine = 2;
 elseif not(isempty(regexpi(cmds,'intersect', 'once' )))
@@ -60,9 +66,17 @@ if exact
 end
 for i_pat = 1:length(pat)
     if ignorecase
-        trouv = regexpi(c,pat{i_pat}); % apply regexp on each pattern
+        if once
+            trouv = regexpi(c,pat{i_pat},'once'); % apply regexp on each pattern
+        else
+            trouv = regexpi(c,pat{i_pat});% apply regexp on each pattern only once
+        end
     else
-        trouv = regexp(c,pat{i_pat}); % apply regexp on each pattern
+        if once
+            trouv = regexp(c,pat{i_pat},'once'); % apply regexp on each pattern
+        else
+            trouv = regexp(c,pat{i_pat}); % apply regexp on each pattern only once
+        end
     end
     idx{i_pat} = find(not(cellfun('isempty',trouv)));
 end
