@@ -65,7 +65,11 @@ for iv = 1:2:numel(varargin)
         end
     end
     for i = 1:numel(list)
-        sel(i) = sel(i) & fun{(iv+1)/2}([list(i).(varargin{iv})],varargin{iv+1});
+        if ~isempty([list(i).(varargin{iv})])
+            sel(i) = sel(i) & fun{(iv+1)/2}([list(i).(varargin{iv})],varargin{iv+1});
+        else
+            sel(i) = false;
+        end
     end
 end
 if inv
