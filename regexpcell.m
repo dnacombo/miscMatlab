@@ -13,6 +13,7 @@ function idx = regexpcell(c,pat, cmds)
 % 'all' (default) returns all indices, including repeats (if several pat match a single cell in c).
 % 'unique' will return unique sorted indices.
 % 'intersect' will return only indices in c that match ALL the patterns in pat.
+% 'logical' will return a logical array instead of the indices.
 % 'once' will return only the first index in each c.
 % 
 % v1 Maximilien Chaumon 01/05/09
@@ -41,6 +42,11 @@ if not(isempty(regexpi(cmds,'exact', 'once' )))
     exact = true;
 else
     exact = false;
+end
+if not(isempty(regexpi(cmds,'logical', 'once' )))
+    lo = true;
+else
+    lo = false;
 end
 if not(isempty(regexpi(cmds,'once', 'once' )))
     once = true;
@@ -99,4 +105,9 @@ if inv % if we want to invert result, then do so.
     others = 1:numel(trouv);
     others(idx) = [];
     idx = others;
+end
+if lo
+    out = false(size(c));
+    out(idx) = true;
+    idx = out;
 end
