@@ -43,7 +43,7 @@ def.ssh_tbx = cdhome('ssh2_v2_m1_r6');
 def.user = getenv('USER');
 def.pass = 'not recommended';
 def.ssh_pubkey = fullfile(getenv('HOME'),'/.ssh/id_rsa');
-def.host_with_maxfilter = 'pclx22.meg.chups.jussieu.fr';
+def.host_with_maxfilter = 'icm-meg-le02';
 
 if not(exist('cfg','var'))
     cfg = [];
