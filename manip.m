@@ -94,9 +94,9 @@ switch lower(cmd)
         end
         cd(projectsList(activeProject).HomeDir);
     case 'close'
-        if nargin < 2 || ~strcmp(varargin{1},'nosave')
-            manip('save')
-        end
+%         if nargin < 2 || ~strcmp(varargin{1},'nosave')
+%             manip('save')
+%         end
         openDocuments = matlab.desktop.editor.getAll;
         openDocuments.close;
         
