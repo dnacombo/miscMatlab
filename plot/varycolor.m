@@ -337,6 +337,7 @@ if showit
     colormap(ColorSet)
     axis off
 end
+end
 
 function colorMap = lines10(n)
 %LINES10  Color colorMap with the line colors.
@@ -362,14 +363,18 @@ c = [0,0,1
 
 colorMap = c(rem(0:n-1,size(c,1))+1,:);
 
+end
+
 function imthis(cmap)
 
 imagesc(permute(cmap,[1 3 2]))
 axis off xy
+end
 
 function cols = rgb(r,g,b)
 cols = [r g b]/255;
 
+end
 function cols = viridis(numberOfColors)
 
 viridis = [...
@@ -633,6 +638,7 @@ viridis = [...
 idx = round(linspace(1,size(viridis,1),numberOfColors));
 cols = viridis(idx,:);
 
+end
 
 function [rgb] = colors(name)
 
@@ -712,6 +718,7 @@ else
     rgb = cell2mat(cols(strcmp(cols(:,1),name),2:end));
 end
 
+end
 function cols = collist
 
 cols = {
@@ -1375,7 +1382,7 @@ cols = {
     };
 cols(:,2:end) = cellfun(@(x)x/255,cols(:,2:end),'uniformoutput',0);
 
-
+end
 function [row, col,n] = num2rowcol(num,R)
 % 
 % [row col, n] = num2rowcol(num[,R])
@@ -1397,7 +1404,7 @@ if nargout == 0
     disp([row(:) col(:)])
     clear row col
 end
-
+end
 function output_txt = datatxt(~,event_obj)
 % ~            Currently not used (empty)
 % event_obj    Object containing event data structure
@@ -1419,7 +1426,7 @@ else
 end
 
 disp(output_txt)
-
+end
 function [map,num,typ] = brewermap(N,scheme)
 % The complete selection of ColorBrewer colorschemes (RGB colormaps).
 %
@@ -1589,12 +1596,14 @@ else% String
 	end
 end
 %
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%brewermap
 function tok = bmMatch(vec,str)
 idx = strcmpi(vec,str);
 assert(any(idx),'Colorscheme "%s" is not supported. Check the token tables.',str)
 tok = vec{idx};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmMatch
+end
 function [map,num,typ] = bmSample(N,isr,tok)
 % Pick a colorscheme, downsample/interpolate to the requested colormap length.
 %
@@ -1625,18 +1634,22 @@ if itp
 	map = bmLab2RGB(map,M,wpt); % optional
 end
 %
+
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmSample
 function rgb = bmGammaCor(rgb)
 % Gamma correction of RGB data.
 idx = rgb <= 0.0031308;
 rgb(idx) = 12.92 * rgb(idx);
 rgb(~idx) = real(1.055 * rgb(~idx).^(1/2.4) - 0.055);
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmGammaCor
 function rgb = bmGammaInv(rgb)
 % Inverse gamma correction of RGB data.
 idx = rgb <= 0.04045;
 rgb(idx) = rgb(idx) / 12.92;
 rgb(~idx) = real(((rgb(~idx) + 0.055) / 1.055).^2.4);
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmGammaInv
 function lab = bmRGB2Lab(rgb,M,wpt) % Nx3 <- Nx3
 % Convert a matrix of RGB values to Lab.
@@ -1653,6 +1666,7 @@ F = idx.*(xyz.^(1/3)) + ~idx.*(xyz*(29/6)^2/3+4/29);
 lab(:,2:3) = bsxfun(@times,[500,200],F(:,1:2)-F(:,2:3));
 lab(:,1) = 116*F(:,2) - 16;
 %
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmRGB2Lab
 function rgb = bmLab2RGB(lab,M,wpt) % Nx3 <- Nx3
 % Convert a matrix of Lab values to RGB.
@@ -1669,6 +1683,7 @@ xyz = bsxfun(@times,tmp,wpt);
 % XYZ2RGB
 rgb = max(0,min(1, bmGammaCor(xyz * M.')));
 %
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%cbLab2RGB
 function bmPlotFig(seq)
 % Creates a figure showing all of the ColorBrewer colorschemes.
@@ -1709,6 +1724,7 @@ end
 %
 drawnow()
 %
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmPlotFig
 function [idx,itp] = bmIndex(N,num,typ,isr)
 % Ensure exactly the same colors as in the online ColorBrewer schemes.
@@ -1770,6 +1786,7 @@ end
 %
 if isr
 	idx = idx(end:-1:1);
+end
 end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmIndex
@@ -1899,6 +1916,7 @@ switch typ
 		error('The colorscheme type "%s" is not recognized',typ)
 end
 %
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmSelect
 % Code and Implementation:
 % Copyright (c) 2017 Stephen Cobeldick
@@ -1946,5 +1964,6 @@ catch
 end
 idx = round(linspace(1,size(d,1),numberOfColors));
 cols = d(idx,:);
+end
 
 
