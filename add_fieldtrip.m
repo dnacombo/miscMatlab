@@ -14,4 +14,4 @@ global ft_default
 ft_default.showcallinfo = 'no';
 
 ft_defaults
-
+ft_version
