@@ -16,12 +16,13 @@ function [outf, whichempty] = flist_consolidate(f,fs)
 % missing elements are listed in whichempty.
 %
 if isempty(f);outf = [];whichempty = [];return;end
-if isempty(fs)
+if ~exist('fs', 'var') || isempty(fs)
     % list all fields
     fields = fieldnames(f);
 else
     fields = fs;
 end
+
 % find those that end with idx
 idxfields = fields(regexpcell(fields,'.*idx$'));
 if isempty(idxfields)
