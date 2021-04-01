@@ -115,8 +115,15 @@ if iscell(channame) || ischar(channame)
         end
         channame = tmp;
     end
+    toremove = strncmp(channame,'-',1);
+    channametoremove = regexprep(channame(toremove),'^-','');
+    channame(toremove) = [];
     
     nb = regexpcell(labels,channame,[cmd 'ignorecase']);
+    if ~isempty(channametoremove)
+        nbr = regexpcell(labels,channametoremove,[cmd 'ignorecase']);
+        nb(ismember(nb,nbr)) = [];
+    end
     
 elseif isnumeric(channame)
     nb = channame;
