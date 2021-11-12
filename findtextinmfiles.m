@@ -36,7 +36,7 @@ if recurse
     fs = rdir(fullfile(where,'**', filesep,'*'));
 else
     fs = dir(where);
-    [fs.name] = rep2struct(cellstrjoin({fs.folder},{fs.name},filesep));
+    [fs.name] = rep2struct(cellstrjoin({fs.folder},{fs.name},filesep)');
     fs = rmfield(fs,'folder');
 end
 if not(isempty(exclude))
@@ -47,7 +47,7 @@ if not(isempty(filematch))
 end
 output = [];
 for i_f = 1:numel(fs)
-    if isdir(fs(i_f).name)
+    if isfolder(fs(i_f).name)
         continue
     end
     txt = readtext(fs(i_f).name,'\n',[],[],'textual');
