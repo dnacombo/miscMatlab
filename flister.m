@@ -72,6 +72,10 @@ end
 if ischar(g)
     error(g);
 end
+if ~isempty(g.list) && strcmp(g.sortfields,'all')
+    g.sortfields = '';
+    warning('Force keeping input list order')
+end
 if ischar(g.sortfields)
     g.sortfields = {g.sortfields};
 end
