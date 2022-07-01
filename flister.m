@@ -62,6 +62,7 @@ g = finputcheck( varargin, ...
     'cmds' {'string'} [] ''
     'recurse' {'integer';'string'} [] 1
     'noidx' {'integer'} [0 1] 0
+    'silent' {'integer'} [0 1] 0
     });
 if ischar(g)
     error(g);
@@ -90,7 +91,9 @@ if isempty(g.list)
     end
     all = cellstrjoin({all.folder},{all.name},filesep);
     if isempty(all)
+      if ~g.silent
         disp('No files found')
+      end
         f = [];
         return
     end
