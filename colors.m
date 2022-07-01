@@ -48,7 +48,7 @@ elseif strcmp(name,'gallery')
     allcols = cell2mat(cols(:,2:end));
     s = size(allcols);
     [r,c,n] = num2rowcol(s(1));
-    allcols = padarray(allcols,[n,0],NaN,'post');
+    allcols = [allcols;NaN(n,3)];
     allcols = reshape(allcols,r,c,[]);
     figure(158866);clf
     set(gcf,'numbertitle','off','name','colors','menuBar','none')
