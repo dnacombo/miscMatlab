@@ -62,7 +62,7 @@ else
 end
 
 if ischar(pat)
-    pat = cellstr(pat);
+    pat = {pat};
 end
 
 if exact
