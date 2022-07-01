@@ -51,12 +51,15 @@ end
 % scan fields
 sel = true(size(list));
 for iv = 1:2:numel(varargin)
+    if isempty(varargin{iv+1})
+        continue
+    end
     % depending on the type of data in each field
     if isempty(fun{(iv+1)/2})
         if isnumeric(list(1).(varargin{iv}))
             fun{(iv+1)/2} = @eq;
         elseif ischar(list(1).(varargin{iv}))
-            if varargin{iv+1}(1) == '~'
+            if strncmp(varargin{iv+1},'~',1)
                 varargin{iv+1}(1) = [];
                 fun{(iv+1)/2} = @(x,y)isempty(regexp(x,y, 'once'));
             else
