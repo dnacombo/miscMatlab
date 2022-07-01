@@ -27,18 +27,18 @@ end
 idxfields = fields(regexpcell(fields,'.*idx$'));
 if isempty(idxfields)
     % we don't have idx fields. create some.
-    idxfields = cellfun(@(x) [x 'idx'],fs,'uniformoutput',0);
+    idxfields = cellfun(@(x) [x 'idx'],fields,'uniformoutput',0);
     for ifield = 1:numel(idxfields)
-        if isnumeric(f(1).(fs{ifield}))
-            alluniques{ifield} = unique([f.(fs{ifield})]);
+        if isnumeric(f(1).(fields{ifield}))
+            alluniques{ifield} = unique([f.(fields{ifield})]);
             alluniques{ifield}(isnan(alluniques{ifield})) = [];
         else
-            alluniques{ifield} = unique({f.(fs{ifield})});
+            alluniques{ifield} = unique({f.(fields{ifield})});
         end
     end
     for i = 1:numel(f)
         for ifield = 1:numel(idxfields)
-            f(i).(idxfields{ifield}) = find(ismember(alluniques{ifield},f(i).(fs{ifield})));
+            f(i).(idxfields{ifield}) = find(ismember(alluniques{ifield},f(i).(fields{ifield})));
         end
     end
 end
@@ -85,7 +85,7 @@ end
 if isfield(outf,'name')
     iempty = cellfun(@isempty,{outf.name});
 else
-    iempty = cellfun(@isempty,{outf.(fs{1})});
+    iempty = cellfun(@isempty,{outf.(fields{1})});
 end
 if nargout > 1
     % list all their expected field values
@@ -113,9 +113,9 @@ if nargout > 1
     end
 end
 
-if exist('fs','var')
-    fs = cellfun(@(x) [x 'idx'],fs,'uniformoutput',0);
-    dperm = find(ismember(idxfields',fs));
+if exist('fields','var')
+    fields = cellfun(@(x) [x 'idx'],fields,'uniformoutput',0);
+    dperm = find(ismember(idxfields',fields));
     order = 1:numel(idxfields);
     order(ismember(order,dperm)) = [];
     order = [dperm, order];
