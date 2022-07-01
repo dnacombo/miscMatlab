@@ -90,11 +90,12 @@ if isempty(g.list)
         [all] = dir(fullfile(rootdir,'*'));
     end
     all = cellstrjoin({all.folder},{all.name},filesep);
+    all(regexpcell(all,['\' filesep '\.{1,2}$'])) = []; % remove . and ..
     if isempty(all)
       if ~g.silent
         disp('No files found')
       end
-        f = [];
+        f = struct('name',{});
         return
     end
         
