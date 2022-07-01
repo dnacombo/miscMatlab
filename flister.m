@@ -128,7 +128,7 @@ if isempty(names) || numel(fieldnames(names{1})) == 0
     f = struct('name',filenames);
 else
     for i = 1:numel(names)
-        f(i) = names{i};
+        f(i) = names{i}(1);
     end
     factnames = fieldnames(f);
     [f.name] = filenames{:};
