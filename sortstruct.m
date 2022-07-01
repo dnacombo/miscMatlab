@@ -28,6 +28,7 @@ else
     defifnotexist('sorter',repmat({[]},1,numel(by)));
 end
 if all(cellfun(@isempty,by))
+    S = reshape(S,s);
     return
 end
 if ischar(S(1).(by{1}))
