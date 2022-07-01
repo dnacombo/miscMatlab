@@ -20,7 +20,7 @@ if numel(varargin) > 0 && isnumeric(varargin{1}) && varargin{1} > 10 && varargin
     fr = floor(f/10);   % get number of rows
     fc = rem(f,10);     % get number of columns
     varargin(1) = [];   % remove geometry from original input
-    if numel(varargin) >= 1 && ishandle(varargin{1})
+    if numel(varargin) >= 1 && all(ishandle(varargin{1}))
         h = varargin{1};
         varargin(1) = [];
         if not(isempty(varargin))
