@@ -34,7 +34,12 @@ cfgmrk = [];
 cfgmrk.markerfile = cfg.markerfile;
 cfgmrk.hdr = cfg.hdr;
 disp(['Excluding segments marked with marker ' cfg.excludename ])
-event = ft_readmarkerfile(cfgmrk);
+switch myfileparts(cfg.markerfile,'e')
+    case '.mrk'
+        event = ft_readmarkerfile(cfgmrk);
+    case '.txt'
+        event = ft_readcsvmarkerfile(cfgmrk);
+end
 
 % exclude events named cfg.excludename
 
