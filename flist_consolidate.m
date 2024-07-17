@@ -19,6 +19,8 @@ if isempty(f);outf = [];whichempty = [];return;end
 if ~exist('fs', 'var') || isempty(fs)
     % list all fields
     fields = fieldnames(f);
+    % remove idxfields (they will be recreated).
+    fields(regexpcell(fields,'.*idx$')) = [];
 else
     fields = fs;
 end
@@ -28,6 +30,7 @@ idxfields = fields(regexpcell(fields,'.*idx$'));
 if isempty(idxfields)
     % we don't have idx fields. create some.
     idxfields = cellfun(@(x) [x 'idx'],fields,'uniformoutput',0);
+    idxfields(strcmp(idxfields,'nameidx')) = [];
     for ifield = 1:numel(idxfields)
         if isnumeric(f(1).(fields{ifield}))
             alluniques{ifield} = unique([f.(fields{ifield})]);
@@ -41,6 +44,8 @@ if isempty(idxfields)
             f(i).(idxfields{ifield}) = find(ismember(alluniques{ifield},f(i).(fields{ifield})));
         end
     end
+else
+    error('Don''t enter field names ending with ''idx'' (reserved)')
 end
 ofields = cellfun(@(x) x(1:end-3),idxfields,'uniformoutput',0);
 % find all unique values for each of these fields
@@ -120,7 +125,7 @@ if exist('fields','var')
     order(ismember(order,dperm)) = [];
     order = [dperm, order];
     outf = permute(outf,order);
-    s = size(outf);s = mat2cells(s(1:numel(dperm)));
+    s = [size(outf) ones(1,numel(dperm)-ndims(outf))];s = mat2cells(s(1:numel(dperm)));
     s = {s{:} []};
     outf = reshape(outf,s{:});
 end
