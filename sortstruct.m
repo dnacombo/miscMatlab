@@ -28,7 +28,7 @@ if ischar(by)
 else
     defifnotexist('sorter',repmat({[]},1,numel(by)));
     if not(exist('direction','var'))
-        direction = 'ascend';
+        direction = {'ascend'};
     end
     defifnotexist('direction',repmat({direction},1,numel(by)));
 end
