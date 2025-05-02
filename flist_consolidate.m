@@ -25,7 +25,9 @@ else
     fields = fs;
 end
 % move field name to the end of the list
-fields = movel(fields,find(strcmp('name',fields)),numel(fields));
+if any(strcmp(fields,'name'))
+    fields = movel(fields,find(strcmp(fields,'name')),numel(fields));
+end
 % find those that end with idx
 idxfields = fields(regexpcell(fields,'.*idx$'));
 if isempty(idxfields)
