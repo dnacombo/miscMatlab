@@ -97,8 +97,8 @@ else
 end
 if nargout > 1
     % list all their expected field values
-    [a,b,c,d,e,f,g,h] = ind2sub(size(outf),find(iempty));
-    wempty = [a;b;c;d;e;f;g;h];
+    [a,b,c,d,e,ff,g,h] = ind2sub(size(outf),find(iempty));
+    wempty = [a;b;c;d;e;ff;g;h];
     if not(isempty(wempty))
         i = 8;
         while all(wempty(i,:) == 1)
@@ -131,6 +131,10 @@ if exist('fields','var')
     s = [size(outf) ones(1,numel(dperm)-ndims(outf))];s = mat2cells(s(1:numel(dperm)));
     s = {s{:} []};
     outf = reshape(outf,s{:});
+end
+
+if numel(outf) ~= numel(f)
+    fprintf('Dropped some data: %d --> %d elements\n', numel(f), numel(outf))
 end
 
 function c = mat2cells(m)
