@@ -1,131 +1,58 @@
-function stats = rm_anova(x, s, f)
+function stats = rm_anova_clean(x,fnames)
 %
 %  RM_ANOVA
 %
 %  Usage:
-%    >> stats = rm_anova(x, s, f);
+%    >> stats = rm_anova(x, fnames);
+%       x is a matrix with subjects as 1st dimension
+%         factors are along each subsequent dimension
+%       fnames is a cell array of factor names (default {'f1','f2'...})
 %
-%  Author:
-%    Valentin WYART (valentin.wyart@chups.jussieu.fr)
-%
-%
-%
-% function stats = rm_anova2(Y,S,F1,F2,FACTNAMES)
-%
-% Two-factor, within-subject repeated measures ANOVA.
-% For designs with two within-subject factors.
-%
-% Parameters:
-%    Y          dependent variable (numeric) in a column vector
-%    S          grouping variable for SUBJECT
-%    F1         grouping variable for factor #1
-%    F2         grouping variable for factor #2
-%    F1name     name (character array) of factor #1
-%    F2name     name (character array) of factor #2
-%
-%    Y should be a 1-d column vector with all of your data (numeric).
-%    The grouping variables should also be 1-d numeric, each with same
-%    length as Y. Each entry in each of the grouping vectors indicates the
-%    level # (or subject #) of the corresponding entry in Y.
-%
-% Returns:
-%    stats is a cell array with the usual ANOVA table:
-%      Source / ss / df / ms / F / p
-%
-% Notes:
-%    Program does not do any input validation, so it is up to you to make
-%    sure that you have passed in the parameters in the correct form:
-%
-%       Y, S, F1, and F2 must be numeric vectors all of the same length.
-%
-%       There must be at least one value in Y for each possible combination
-%       of S, F1, and F2 (i.e. there must be at least one measurement per
-%       subject per condition).
-%
-%       If there is more than one measurement per subject X condition, then
-%       the program will take the mean of those measurements.
-%
+% Maximilien Chaumon
+% based on
+% Valentin Wyart
 % Aaron Schurger (2005.02.04)
 %   Derived from Keppel & Wickens (2004) "Design and Analysis" ch. 18
 %
+% MIT License
+% 
+% Copyright (c) **2025 Maximilien Chaumon**
+% 
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+% 
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
 
-if ndims(x) > 2
-    t = doconds(size(x));
-    s = t{1}; % subjects
-    f = t(2:end); % factors
-    clear t
-end
+t = doconds(size(x));
+s = t{1}; % subjects
+f = t(2:end); % factors
+clear t
 
-n = length(f);
+n = numel(f);
+is=unique(s);% list of subjects
+iff = cellfun(@unique,f,'uniformoutput',false);% list of factor levels
 
-command = 'is=unique(s);';
-eval(command);
-for i = 1:n
-    command = ['i' int2str(i) '=unique(f{' int2str(i) '});'];
-    eval(command);
-end
+ns=numel(is);% number of subjects
+nff = cellfun(@numel,iff,'uniformoutput',false); % number of each factor's levels
 
-command = 'ns=length(is);';
-eval(command);
-for i = 1:n
-    command = ['n' int2str(i) '=length(i' int2str(i) ');'];
-    eval(command);
-end
+ddim = [nff{:} ns];
+aver = permute(x,[2:ndims(x) 1]);
 
-dim = '';
-for i = 1:n
-    dim = [dim 'n' int2str(i) ','];
-end
-dim = [dim 'ns'];
-command = ['indx=cell(' dim ');'];
-eval(command);
-command = ['data=cell(' dim ');'];
-eval(command);
-command = ['aver=zeros(' dim ');'];
-eval(command);
-command = '';
-for i = 1:n
-    command = [command 'for j' int2str(i) '=1:n' int2str(i) ','];
-end
-command = [command 'for js=1:ns,'];
-idx = '';
-for i = 1:n
-    idx = [idx 'j' int2str(i) ','];
-end
-idx = [idx 'js'];
-command = [command 'indx{' idx '}=find('];
-for i = 1:n
-    command = [command 'f{' int2str(i) '}==i' int2str(i) '(j' int2str(i) ')&'];
-end
-command = [command 's==is(js));'];
-command = [command 'data{' idx '}=x(indx{' idx '});'];
-command = [command 'aver(' idx ')=nanmean(data{' idx '});'];
-for i = 1:n
-    command = [command 'end,'];
-end
-command = [command 'end'];
-eval(command);
-
-command = 'st=';
-for i = 1:n+1
-    command = [command 'nansum('];
-end
-command = [command 'aver,'];
-for i = 1:n+1
-    command = [command int2str(n+2-i) '),'];
-end
-command = [command(1:end-1) ';'];
-eval(command);
-command = 'ss=reshape(';
-for i = 1:n
-    command = [command 'nansum('];
-end
-command = [command 'aver,'];
-for i = 1:n
-    command = [command int2str(n+1-i) '),'];
-end
-command = [command '[ns,1]);'];
-eval(command);
+st = nansum(aver(:));
+ss = nansum(reshape(aver,[prod(ddim(1:end-1)) ns]),1)';
 for i = 1:n
     comb = combnk(1:n, i);
     for i1 = 1:size(comb, 1)
@@ -142,7 +69,7 @@ for i = 1:n
         end
         resdim = '[';
         for i2 = 1:size(comb, 2)
-            resdim = [resdim 'n' int2str(comb(i1,i2)) ','];
+            resdim = [resdim 'nff{' int2str(comb(i1,i2)) '},'];
         end
         if size(comb, 2) == 1
             resdim = [resdim '1]'];
@@ -165,7 +92,7 @@ for i = 1:n
             end
             resdim = '[';
             for i2 = 1:size(comb, 2)
-                resdim = [resdim 'n' int2str(comb(i1,i2)) ','];
+                resdim = [resdim 'nff{' int2str(comb(i1,i2)) '},'];
             end
             resdim = [resdim 'ns]'];
             command = [sid '=reshape('];
@@ -177,7 +104,6 @@ for i = 1:n
         end
     end
 end
-
 command = 'dfs=ns-1;';
 eval(command);
 for i = 1:n
@@ -370,25 +296,7 @@ for i = 1:n
         fd = fd(1:end-1);
         command = ['stats.' fd '.fstats=f' id ';'];
         eval(command);
-        command = ['stats.' fd '.df= [df' id ',df' id 's];'];
-        eval(command);
         command = ['stats.' fd '.pvalue=p' id ';'];
         eval(command);
     end
 end
-
-if nargout == 0
-    fs = fieldnames(stats);
-    str = 'Stats repeated measures ANOVA:\n';
-    s = size(x);
-    str = [str num2str(n) '(' sprintf('%gx', s(2:end)) '\b) Factors -- '];
-    str = [str num2str(numel(is)) ' Subjects\n'];
-    for i = 1:numel(fs)
-        str = [str fs{i} ' :\n\tF(' sprintf('%g,%g',stats.(fs{i}).df) ') = ' num2str(stats.(fs{i}).fstats) '\n'];
-        str = [str '\tpvalue = ' num2str(stats.(fs{i}).pvalue) '\n'];
-    end
-    fprintf(str)
-    clear stats
-end
-
-
