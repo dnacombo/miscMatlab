@@ -50,6 +50,9 @@ end
 
 % scan fields
 sel = true(size(list));
+if isempty(list)
+    return
+end
 for iv = 1:2:numel(varargin)
     if isempty(varargin{iv+1})
         continue
