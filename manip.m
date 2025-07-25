@@ -94,9 +94,9 @@ switch lower(cmd)
         end
         cd(projectsList(activeProject).HomeDir);
     case 'close'
-%         if nargin < 2 || ~strcmp(varargin{1},'nosave')
-%             manip('save')
-%         end
+        if nargin < 2 || ~strcmp(varargin{1},'nosave')
+            manip('save')
+        end
         openDocuments = matlab.desktop.editor.getAll;
         openDocuments.close;
         
@@ -217,12 +217,12 @@ switch lower(cmd)
         manip close
         load(fpath)
         
-        switch getenv('computername')
-            case 'maxinux'
-                projectsList(ind).HomeDir = strrep(projectsList(ind).HomeDir,'/home/maximilien.chaumon/','/home/maxi/');
-            case 'labinux'
-                projectsList(ind).HomeDir = strrep(projectsList(ind).HomeDir,'/home/maxi/','/home/maximilien.chaumon/');
-        end
+        % switch getenv('computername')
+        %     case 'maxinux'
+        %         projectsList(ind).HomeDir = strrep(projectsList(ind).HomeDir,'/home/maximilien.chaumon/','/home/maxi/');
+        %     case 'labinux'
+        %         projectsList(ind).HomeDir = strrep(projectsList(ind).HomeDir,'/home/maxi/','/home/maximilien.chaumon/');
+        % end
                 
         try
             cd(projectsList(ind).HomeDir);
@@ -231,12 +231,12 @@ switch lower(cmd)
         end
         
         filenames = projectsList(ind).OpenedFiles;
-        switch getenv('computername')
-            case 'maxinux'
-                filenames = strrep(filenames,'/home/maximilien.chaumon/','/home/maxi/');
-            case 'labinux'
-                filenames = strrep(filenames,'/home/maxi/','/home/maximilien.chaumon/');
-        end
+        % switch getenv('computername')
+        %     case 'maxinux'
+        %         filenames = strrep(filenames,'/home/maximilien.chaumon/','/home/maxi/');
+        %     case 'labinux'
+        %         filenames = strrep(filenames,'/home/maxi/','/home/maximilien.chaumon/');
+        % end
         for ii = 1:length(filenames)
             if exist(filenames{ii}, 'file')
                 matlab.desktop.editor.openDocument(filenames{ii});
